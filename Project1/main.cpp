@@ -12,11 +12,16 @@ int main(void) {
 
 	//네모 모양의 플레이어
 	RectangleShape player;
-	player.setSize(Vector2f(40, 40));//플레이어 네모 크기
-	player.setPosition(100, 100);//플레이어 기본 x, y좌표
-	player.setFillColor(Color::Red);//빨간색 네모
-
+	player.setSize(Vector2f(40, 40));//플레이어 사이즈
+	player.setPosition(100, 100);//플레이어 시작 위치
+	player.setFillColor(Color::Red);//플레이어 색상
 	int player_speed = 5;//플레이어 속도
+
+
+	RectangleShape enemy;//적
+	enemy.setSize(Vector2f(70, 70));//적 사이즈
+	enemy.setPosition(500, 300);//적 시작 위치
+	enemy.setFillColor(Color::Yellow);//적 색상
 
 
 	//유지 시키는 방법은? -> 무한 반복
@@ -55,7 +60,10 @@ int main(void) {
 
 
 		//화면이 열려져 있는 동안 계속 그려야 함
-		window.draw(player);//player 보여주기(그려주기)
+		//draw는 나중에 호출할수록 우선순위가 높아짐
+		window.draw(player);//플레이어 보여주기(그려주기)
+		window.draw(enemy);//적 보여주기
+
 		window.display();
 	}
 
