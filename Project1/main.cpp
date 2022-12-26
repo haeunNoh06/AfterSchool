@@ -47,6 +47,9 @@ int main(void) {
 			player.move(1, 0);//오른쪽 이동
 		}
 
+		window.clear(Color::Black);//플레이어가 움직일 때 
+
+
 		//화면이 열려져 있는 동안 계속 그려야 함
 		window.draw(player);//player 보여주기(그려주기)
 		window.display();
