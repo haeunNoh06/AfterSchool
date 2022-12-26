@@ -9,6 +9,11 @@ int main(void) {
 	//잠깐 떴다가 사라지는 건 return 0때문에 프로그램이 종료된 것
 	RenderWindow window(VideoMode(640, 480), "AfterSchool");
 
+	//네모 모양의 플레이어
+	RectangleShape player;
+	player.setSize(Vector2f(40, 40));//플레이어 네모 크기
+	player.setPosition(100, 100);//플레이어 기본 x, y좌표
+
 	//유지 시키는 방법은? -> 무한 반복
 	while (window.isOpen()) //윈도우창이 열려있는 동안 계속 반복
 	{ 
@@ -22,6 +27,9 @@ int main(void) {
 				window.close();//윈도우창이 닫힘
 			}
 		}
+		//화면이 열려져 있는 동안 계속 그려야 함
+		window.draw(player);//player 보여주기(그려주기)
+		window.display();
 	}
 
 	printf("Hello World");
