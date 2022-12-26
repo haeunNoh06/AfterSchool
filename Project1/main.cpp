@@ -56,13 +56,19 @@ int main(void) {
 			player.move(player_speed, 0);//오른쪽 이동
 		}
 
+		//intersects : 플레이어와 적 사이에서 교집합이 있는가
+		if (player.getGlobalBounds().intersects(enemy.getGlobalBounds()))
+		{
+			printf("enemy와의 충돌\n");
+		}
+
 		window.clear(Color::Black);//플레이어 자체 제거 (배경 지우기)
 
 
 		//화면이 열려져 있는 동안 계속 그려야 함
 		//draw는 나중에 호출할수록 우선순위가 높아짐
-		window.draw(player);//플레이어 보여주기(그려주기)
 		window.draw(enemy);//적 보여주기
+		window.draw(player);//플레이어 보여주기(그려주기)
 
 		window.display();
 	}
