@@ -1,0 +1,17 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <time.h>
+
+int main(void)
+{
+	srand((unsigned int)time(NULL));
+
+	int arr[5];
+	for (int i = 0; i < 5; i++)
+	{
+		arr[i] = rand()%100+1;
+		printf("%d\n", arr[i]);
+	}
+
+	return 0;
+}
