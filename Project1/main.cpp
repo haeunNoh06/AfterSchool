@@ -8,6 +8,7 @@ int main(void) {
 	//640 x 480 윈도우 화면 나옴
 	//잠깐 떴다가 사라지는 건 return 0때문에 프로그램이 종료된 것
 	RenderWindow window(VideoMode(640, 480), "AfterSchool");
+	window.setFramerateLimit(60);//1초에 60장 보여준다. 플레이어가 빨리 가지 않도록 하기
 
 	//네모 모양의 플레이어
 	RectangleShape player;
@@ -28,6 +29,24 @@ int main(void) {
 				window.close();//윈도우창이 닫힘
 			}
 		}
+
+		if (Keyboard::isKeyPressed(Keyboard::Left))
+		{
+			player.move(-1, 0);//왼쪽 이동
+		}
+		else if (Keyboard::isKeyPressed(Keyboard::Up))
+		{
+			player.move(0, -1);//위쪽 이동
+		}
+		else if (Keyboard::isKeyPressed(Keyboard::Down))
+		{
+			player.move(0, 1);//아래쪽 이동
+		}
+		else if (Keyboard::isKeyPressed(Keyboard::Right))
+		{
+			player.move(1, 0);//오른쪽 이동
+		}
+
 		//화면이 열려져 있는 동안 계속 그려야 함
 		window.draw(player);//player 보여주기(그려주기)
 		window.display();
