@@ -33,19 +33,20 @@ int main(void) {
 			}
 		}
 
+		//모두 if로 해서 방향키 동시적용
 		if (Keyboard::isKeyPressed(Keyboard::Left))
 		{
 			player.move(-1*player_speed, 0);//왼쪽 이동
 		}
-		else if (Keyboard::isKeyPressed(Keyboard::Up))
+		if (Keyboard::isKeyPressed(Keyboard::Up))
 		{
 			player.move(0, -1 * player_speed);//위쪽 이동
 		}
-		else if (Keyboard::isKeyPressed(Keyboard::Down))
+		if (Keyboard::isKeyPressed(Keyboard::Down))
 		{
 			player.move(0, player_speed);//아래쪽 이동
 		}
-		else if (Keyboard::isKeyPressed(Keyboard::Right))
+		if (Keyboard::isKeyPressed(Keyboard::Right))
 		{
 			player.move(player_speed, 0);//오른쪽 이동
 		}
