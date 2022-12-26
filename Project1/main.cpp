@@ -10,15 +10,18 @@ int main(void) {
 	RenderWindow window(VideoMode(640, 480), "AfterSchool");
 
 	//유지 시키는 방법은? -> 무한 반복
-	while (window.isOpen()) { //윈도우창이 열려있는 동안 계속 반복
-		
+	while (window.isOpen()) //윈도우창이 열려있는 동안 계속 반복
+	{ 
 		Event event;//이벤트 생성
-		while (window.pollEvent(event)) {//이벤트가 발생. 이벤트가 발생해야 event 초기화가 됨
-			//종료(x)버튼을 누르면
-			if (event.type == Event::Closed)//Event::Closed라는 이벤트가 발생하면
+		while (window.pollEvent(event)) //이벤트가 발생. 이벤트가 발생해야 event 초기화가 됨
+		{
+			switch (event.type)
+			{
+				//종료(x)버튼을 누르면 Event::Closed(0) 
+			case Event::Closed ://정수임
 				window.close();//윈도우창이 닫힘
+			}
 		}
-
 	}
 
 	printf("Hello World");
