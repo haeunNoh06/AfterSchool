@@ -30,8 +30,14 @@ int main(void) {
 	text.setFillColor(Color(255, 255, 255));//RGB로 흰색 표현
 	text.setPosition(0, 0);//텍스트 위치 0,0
 
+	//배경
+	Texture bg_texture;
+	bg_texture.loadFromFile("./resources/image/background.jpg");
+	Sprite bg_sprite;
+	bg_sprite.setTexture(bg_texture);
+	bg_sprite.setPosition(0, 0);
 
-	// 네모 모양의 플레이어
+	// 플레이어
 	RectangleShape player;
 	player.setSize(Vector2f(40, 40));//플레이어 사이즈
 	player.setPosition(100, 100);//플레이어 시작 위치
@@ -137,6 +143,7 @@ int main(void) {
 		text.setString(info);
 
 		window.clear(Color::Black);//플레이어 자체 제거 (배경 지우기)
+		window.draw(bg_sprite);
 
 		for (int i = 0; i < 5; i++)
 		{
