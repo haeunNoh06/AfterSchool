@@ -7,11 +7,8 @@ int main(void) {
 	char str[30] = "score : ";
 	int score = 300;
 
-	char str2[30];
-	//정수를 문자열로 (변환할 정수, 적용 대상, 진수)
-	itoa(score, str2, 10);
+	sprintf(str, "score : %d", score);//sprintf : string의 약자, 문자열에다 출력해줌 == str에 가운데에 있는 문자열이 들어감
 
-	strcat(str, str2);
 	printf("%s\n", str);
 
 	return 0;
