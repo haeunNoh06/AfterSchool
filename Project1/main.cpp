@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
+//#include <string.h>
 #include <time.h>
 #include <SFML/Graphics.hpp>
 
@@ -18,11 +19,12 @@ int main(void) {
 	font.loadFromFile("C:\\Windows\\Fonts\\Arial.ttf");//C드라이브에 있는 폰트 가져오기
 
 	Text text;
+	char info[40];
 	text.setFont(font);//폰트 세팅
 	text.setCharacterSize(24);//폰트 크기
 	text.setFillColor(Color(255, 255, 255));//RGB로 흰색 표현
 	text.setPosition(0, 0);//텍스트 위치 0,0
-	text.setString("score");//테스트
+
 
 	//네모 모양의 플레이어
 	RectangleShape player;
@@ -110,6 +112,8 @@ int main(void) {
 			}
 		}
 
+		sprintf(info, "score: %d\n", player_score);
+		text.setString(info);
 		printf("score : %d\n", player_score);
 
 		window.clear(Color::Black);//플레이어 자체 제거 (배경 지우기)
