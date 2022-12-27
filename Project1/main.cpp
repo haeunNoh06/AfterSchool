@@ -14,16 +14,28 @@ int main(void) {
 	RenderWindow window(VideoMode(640, 480), "AfterSchool");
 	window.setFramerateLimit(60);//1초에 60장 보여준다. 플레이어가 빨리 가지 않도록 하기
 
+	Font font;
+	font.loadFromFile("C:\\Windows\\Fonts\\Arial.ttf");//C드라이브에 있는 폰트 가져오기
+
+	Text text;
+	text.setFont(font);//폰트 세팅
+	text.setCharacterSize(24);//폰트 크기
+	text.setFillColor(Color(255, 255, 255));//RGB로 흰색 표현
+	text.setPosition(0, 0);//텍스트 위치 0,0
+	text.setString("score");//테스트
+
 	//네모 모양의 플레이어
 	RectangleShape player;
 	player.setSize(Vector2f(40, 40));//플레이어 사이즈
 	player.setPosition(100, 100);//플레이어 시작 위치
 	player.setFillColor(Color::Red);//플레이어 색상
 	int player_speed = 5;//플레이어 속도
+	int player_score = 0;//플레이어 점수
 
 
 	RectangleShape enemy[5];//적
 	int enemy_life[5];//적의 체력
+	int enemy_score = 100;//적을 잡을 때마다 얻는 점수
 	for (int i = 0; i < 5; i++)
 	{
 		enemy[i].setSize(Vector2f(70, 70));
@@ -93,9 +105,12 @@ int main(void) {
 				{
 					printf("enemy[%d]와의 충돌\n", i);
 					enemy_life[i] -= 1;//적의 생명 줄이기
+					player_score += enemy_score;
 				}
 			}
 		}
+
+		printf("score : %d\n", player_score);
 
 		window.clear(Color::Black);//플레이어 자체 제거 (배경 지우기)
 
@@ -106,6 +121,7 @@ int main(void) {
 		//화면이 열려져 있는 동안 계속 그려야 함
 		//draw는 나중에 호출할수록 우선순위가 높아짐
 		window.draw(player);//플레이어 보여주기(그려주기)
+		window.draw(text);
 
 		window.display();
 	}
