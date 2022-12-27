@@ -1,8 +1,8 @@
 #include <stdio.h>
 #include <stdlib.h>
-//#include <string.h>
 #include <time.h>
 #include <SFML/Graphics.hpp>
+#include <SFML/Audio.hpp>//SoundBuffer 사용
 
 using namespace sf;
 
@@ -15,6 +15,11 @@ int main(void) {
 	RenderWindow window(VideoMode(640, 480), "AfterSchool");
 	window.setFramerateLimit(60);//1초에 60장 보여준다. 플레이어가 빨리 가지 않도록 하기
 
+
+	long start_time = clock();// 게임 시작 시간
+	long spent_time;// 게임 진행 시간
+
+	// text 폰트
 	Font font;
 	font.loadFromFile("C:\\Windows\\Fonts\\Arial.ttf");//C드라이브에 있는 폰트 가져오기
 
@@ -26,7 +31,7 @@ int main(void) {
 	text.setPosition(0, 0);//텍스트 위치 0,0
 
 
-	//네모 모양의 플레이어
+	// 네모 모양의 플레이어
 	RectangleShape player;
 	player.setSize(Vector2f(40, 40));//플레이어 사이즈
 	player.setPosition(100, 100);//플레이어 시작 위치
@@ -35,9 +40,15 @@ int main(void) {
 	int player_score = 0;//플레이어 점수
 
 
+	// enemy
 	RectangleShape enemy[5];//적
 	int enemy_life[5];//적의 체력
 	int enemy_score = 100;//적을 잡을 때마다 얻는 점수
+	SoundBuffer enemy_explosion_buffer;
+	enemy_explosion_buffer.loadFromFile("./resources/sound/rumble.flac");
+	Sound enemy_explosion_sound;//소리에 대한 정보를 담음
+	enemy_explosion_sound.setBuffer(enemy_explosion_buffer);
+
 	for (int i = 0; i < 5; i++)
 	{
 		enemy[i].setSize(Vector2f(70, 70));
@@ -79,6 +90,8 @@ int main(void) {
 			}
 		}
 
+		spent_time = clock() - start_time;// 시간이 지남에 따라 증가
+
 		//방향키
 		if (Keyboard::isKeyPressed(Keyboard::Left))
 		{
@@ -108,13 +121,20 @@ int main(void) {
 					printf("enemy[%d]와의 충돌\n", i);
 					enemy_life[i] -= 1;//적의 생명 줄이기
 					player_score += enemy_score;
+
+					// TODO : 코드 refactoring 필요
+					if (enemy_life[i] == 0)
+					{
+						enemy_explosion_sound.play();
+					}
 				}
 			}
+
 		}
 
-		sprintf(info, "score: %d\n", player_score);
+		// 시작 시간은 변하지 않음
+		sprintf(info, "score: %d time: %d\n", player_score, spent_time/1000);
 		text.setString(info);
-		printf("score : %d\n", player_score);
 
 		window.clear(Color::Black);//플레이어 자체 제거 (배경 지우기)
 
