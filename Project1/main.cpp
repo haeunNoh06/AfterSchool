@@ -41,9 +41,27 @@ int main(void) {
 		{
 			switch (event.type)
 			{
-				//종료(x)버튼을 누르면 Event::Closed(0) 
+			//종료(x)버튼을 누르면 Event::Closed(0) 
 			case Event::Closed ://정수임
 				window.close();//윈도우창이 닫힘
+				break;
+			//키보드를 눌렀을 때 
+			case Event::KeyPressed: 
+			//case문 안에 변수를 선언할 때에는 중괄호를 쳐야 함
+			{
+				//space키 누르면 모든 enemy 다시 출현
+				if (event.key.code == Keyboard::Space)
+				{
+					for (int i = 0; i < 5; i++)
+					{
+						enemy[i].setSize(Vector2f(70, 70));
+						enemy[i].setPosition(rand() % 300 + 300, rand() % 410);
+						enemy_life[i] = 1;
+						enemy[i].setFillColor(Color::Yellow);//적 색상
+					}
+				}
+				break;
+			}
 			}
 		}
 
@@ -63,18 +81,6 @@ int main(void) {
 		if (Keyboard::isKeyPressed(Keyboard::Right))
 		{
 			player.move(player_speed, 0);//오른쪽 이동
-		}
-
-		//space 키 누르면 모든 enemy 다시 출현
-		if (Keyboard::isKeyPressed(Keyboard::Space))
-		{
-			for (int i = 0; i < 5; i++)
-			{
-				enemy[i].setSize(Vector2f(70, 70));
-				enemy[i].setPosition(rand() % 300 + 300, rand() % 410);
-				enemy_life[i] = 1;
-				enemy[i].setFillColor(Color::Yellow);//적 색상
-			}
 		}
 
 		//enemy와의 충돌
