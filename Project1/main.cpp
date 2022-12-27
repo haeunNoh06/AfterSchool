@@ -8,7 +8,7 @@ using namespace sf;
 
 int main(void) {
 
-	srand((unsigned int)time(NULL));//랜덤 함수 사용
+	srand(time(NULL));//랜덤 함수 사용
 
 	//640 x 480 윈도우 화면 나옴
 	//잠깐 떴다가 사라지는 건 return 0때문에 프로그램이 종료된 것
@@ -42,25 +42,28 @@ int main(void) {
 	player.setSize(Vector2f(40, 40));//플레이어 사이즈
 	player.setPosition(100, 100);//플레이어 시작 위치
 	player.setFillColor(Color::Red);//플레이어 색상
-	int player_speed = 5;//플레이어 속도
+	int player_speed = 7;//플레이어 속도
 	int player_score = 0;//플레이어 점수
 
 
 	// enemy
-	RectangleShape enemy[5];//적
-	int enemy_life[5];//적의 체력
+	const int ENEMY_NUM = 12;
+	RectangleShape enemy[ENEMY_NUM];//적
+	int enemy_life[ENEMY_NUM];//적의 체력
+	int enemy_speed[ENEMY_NUM];
 	int enemy_score = 100;//적을 잡을 때마다 얻는 점수
 	SoundBuffer enemy_explosion_buffer;
 	enemy_explosion_buffer.loadFromFile("./resources/sound/rumble.flac");
 	Sound enemy_explosion_sound;//소리에 대한 정보를 담음
 	enemy_explosion_sound.setBuffer(enemy_explosion_buffer);
 
-	for (int i = 0; i < 5; i++)
+	for (int i = 0; i < ENEMY_NUM; i++)
 	{
 		enemy[i].setSize(Vector2f(70, 70));
 		enemy[i].setPosition(rand()%300+300, rand() % 410);
 		enemy_life[i] = 1;
 		enemy[i].setFillColor(Color::Yellow);//적 색상
+		enemy_speed[i] = -(rand() % 10 + 1);
 	}
 
 
@@ -83,7 +86,7 @@ int main(void) {
 				//space키 누르면 모든 enemy 다시 출현
 				if (event.key.code == Keyboard::Space)
 				{
-					for (int i = 0; i < 5; i++)
+					for (int i = 0; i < ENEMY_NUM; i++)
 					{
 						enemy[i].setSize(Vector2f(70, 70));
 						enemy[i].setPosition(rand() % 300 + 300, rand() % 410);
@@ -118,10 +121,11 @@ int main(void) {
 
 		//enemy와의 충돌
 		//intersects : 플레이어와 적 사이에서 교집합이 있는가
-		for (int i = 0; i < 5; i++)
+		for (int i = 0; i < ENEMY_NUM; i++)
 		{
 			if (enemy_life[i] > 0)
 			{
+				// enemy와의 충돌
 				if (player.getGlobalBounds().intersects(enemy[i].getGlobalBounds()))
 				{
 					printf("enemy[%d]와의 충돌\n", i);
@@ -134,6 +138,8 @@ int main(void) {
 						enemy_explosion_sound.play();
 					}
 				}
+
+				enemy[i].move(enemy_speed[i], 0);
 			}
 
 		}
@@ -145,7 +151,7 @@ int main(void) {
 		window.clear(Color::Black);//플레이어 자체 제거 (배경 지우기)
 		window.draw(bg_sprite);
 
-		for (int i = 0; i < 5; i++)
+		for (int i = 0; i < ENEMY_NUM; i++)
 		{
 			if (enemy_life[i] > 0)  window.draw(enemy[i]);//적 보여주기
 		}
