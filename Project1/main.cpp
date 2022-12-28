@@ -22,6 +22,11 @@ struct Enemy {
 	int life;
 };
 
+// 전역변수 - const로 처리하여 중간에 값을 바꿀 수 없는 것만 전역변수로 세팅
+const int ENEMY_NUM = 10;// 적의 최대 갯수
+const int W_WIDTH = 640, W_HEIGHT = 480;// 창의 크기
+const int GO_WIDTH = 320, GO_HEIGHT = 240;// 게임오버 그림의 크기
+
 int main(void) {
 
 	srand(time(NULL));//랜덤 함수 사용
@@ -59,7 +64,7 @@ int main(void) {
 	gameover_texture.loadFromFile("./resources/image/gameover.png");
 	Sprite gameover_sprite;
 	gameover_sprite.setTexture(gameover_texture);
-	gameover_sprite.setPosition(0, 0);
+	gameover_sprite.setPosition((W_WIDTH-GO_WIDTH)/2, (W_HEIGHT-GO_HEIGHT)/2);//game over 그림 가운데 나타내기
 
 	// 플레이어
 	struct Player player;
@@ -72,7 +77,6 @@ int main(void) {
 
 
 	// enemy
-	const int ENEMY_NUM = 12;
 	struct Enemy enemy[ENEMY_NUM];
 
 	for (int i = 0; i < ENEMY_NUM; i++)
