@@ -225,7 +225,6 @@ int main(void) {
 		// 시작 시간은 변하지 않음
 		sprintf(info, "life: %d score: %d time: %d\n", player.life, player.score, spent_time/1000);
 
-
 		text.setString(info);
 
 		window.clear(Color::Black);//플레이어 자체 제거 (배경 지우기)
