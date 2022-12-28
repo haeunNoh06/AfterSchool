@@ -43,6 +43,14 @@ int main(void) {
 	long spent_time;// 게임 진행 시간
 	int is_gameover = 0;
 
+	// BGM
+	SoundBuffer BGM_buffer;
+	BGM_buffer.loadFromFile("./resources/sound/bgm.ogg");
+	Sound BGM_sound;
+	BGM_sound.setBuffer(BGM_buffer);
+	BGM_sound.setLoop(1);// BGM 무한 반복
+	BGM_sound.play();
+
 	// text 폰트
 	Font font;
 	font.loadFromFile("C:\\Windows\\Fonts\\Arial.ttf");//C드라이브에 있는 폰트 가져오기
