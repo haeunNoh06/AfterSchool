@@ -33,6 +33,12 @@ struct Enemy {
 	int respawn_time;
 };
 
+//obj1과 obj2의 충돌 여부 충돌하면 1로 반환 아니면 0으로 반환
+int is_collide(RectangleShape obj1, RectangleShape obj2) {
+	return obj1.getGlobalBounds().intersects(obj2.getGlobalBounds());
+}
+
+
 // 전역변수 - const로 처리하여 중간에 값을 바꿀 수 없는 것만 전역변수로 세팅
 const int ENEMY_NUM = 10;// 적의 최대 갯수
 const int W_WIDTH = 1280, W_HEIGHT = 680;// 창의 크기
@@ -138,22 +144,27 @@ int main(void) {
 			//case문 안에 변수를 선언할 때에는 중괄호를 쳐야 함
 			{
 				//space키 누르면 모든 enemy 다시 출현
-				if (event.key.code == Keyboard::Space)
-				{
-					for (int i = 0; i < ENEMY_NUM; i++)
-					{
-						enemy[i].sprite.setSize(Vector2f(70, 70));
-						enemy[i].sprite.setPosition(rand() % 300 + W_WIDTH*0.9, rand() % 380);
-						enemy[i].life = 1;
-						enemy[i].sprite.setFillColor(Color::Yellow);//적 색상
-					}
-				}
+				//if (event.key.code == Keyboard::Space)
+				//{
+				//	for (int i = 0; i < ENEMY_NUM; i++)
+				//	{
+				//		enemy[i].sprite.setSize(Vector2f(70, 70));
+				//		enemy[i].sprite.setPosition(rand() % 300 + W_WIDTH*0.9, rand() % 380);
+				//		enemy[i].life = 1;
+				//		enemy[i].sprite.setFillColor(Color::Yellow);//적 색상
+				//	}
+				//}
 				break;
 			}
 			}
 		}
 
 		spent_time = clock() - start_time;// 시간이 지남에 따라 증가
+
+		//총알이 플레이어럴 따라다닐 수 있도록 
+		player.x = player.sprite.getPosition().x;	//플레이어 x좌표
+		player.y = player.sprite.getPosition().y;	//플레이어 y좌표
+
 
 		//방향키
 		if (Keyboard::isKeyPressed(Keyboard::Left))
@@ -171,6 +182,14 @@ int main(void) {
 		if (Keyboard::isKeyPressed(Keyboard::Right))
 		{
 			player.sprite.move(player.speed, 0);//오른쪽 이동
+		}
+		if (Keyboard::isKeyPressed(Keyboard::Space))
+		{
+			//총알이 발사 되어있지 않다면
+			if (!bullet.is_fired)
+				bullet.sprite.setPosition(player.x + 50, player.y + 15);
+			bullet.is_fired = 1;
+
 		}
 
 		//enemy와의 충돌
@@ -191,9 +210,8 @@ int main(void) {
 			if (enemy[i].life > 0)
 			{
 				// enemy와의 충돌
-				if (player.sprite.getGlobalBounds().intersects(enemy[i].sprite.getGlobalBounds()))
+				if (is_collide(player.sprite, enemy[i].sprite) || is_collide(bullet.sprite, enemy[i].sprite)) 
 				{
-					printf("enemy[%d]와의 충돌\n", i);
 					enemy[i].life -= 1;//적의 생명 줄이기
 					player.score += enemy[i].score;
 
@@ -211,10 +229,31 @@ int main(void) {
 					enemy[i].life = 0;// 적 없애기
 				}
 
+				// 총알과 enemy의 충돌
+				if (is_collide(bullet.sprite, enemy[i].sprite))
+				{
+					enemy[i].life -= 1;
+					player.score += enemy[i].score;
+
+					// TODO : 코드 refactoring 필요
+					if (enemy[i].life == 0)
+					{
+						enemy[i].explosion_sound.play();
+					}
+					bullet.is_fired = 0;
+				}
+
 				enemy[i].sprite.move(enemy[i].speed, 0);
 			}
 
 		}
+
+		if (bullet.is_fired) {
+			bullet.sprite.move(bullet.speed, 0);
+			if (bullet.sprite.getPosition().x > W_WIDTH)
+				bullet.is_fired = 0;
+		}
+
 
 		if (player.life <= 0)
 		{
@@ -238,13 +277,15 @@ int main(void) {
 		//화면이 열려져 있는 동안 계속 그려야 함
 		//draw는 나중에 호출할수록 우선순위가 높아짐
 		window.draw(player.sprite);//플레이어 보여주기(그려주기)
+		if (bullet.is_fired)
+			window.draw(bullet.sprite);
 		window.draw(text);
 		window.draw(bullet.sprite);// 총알 그리기
 
 		if (is_gameover)
 		{
 			window.draw(gameover_sprite);
-			//sf::sleep();// 게임 멈추기
+			// TODO : 게임이 멈추는 것을 구현할 것
 		}
 
 		window.display();
