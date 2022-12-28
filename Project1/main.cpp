@@ -12,6 +12,15 @@ struct Player {
 	int speed;
 	int score;
 	int life;
+	float x, y;// player 좌표
+};
+
+//총알
+struct Bullet {
+	RectangleShape sprite;
+	int speed;
+	int is_fired;// 발사 여부
+
 };
 
 struct Enemy {
@@ -80,15 +89,22 @@ int main(void) {
 	struct Player player;
 	player.sprite.setSize(Vector2f(40, 40));//플레이어 사이즈
 	player.sprite.setPosition(100, 100);//플레이어 시작 위치
+	player.x = player.sprite.getPosition().x;// x좌표
+	player.y = player.sprite.getPosition().y;// y좌표
 	player.sprite.setFillColor(Color::Red);//플레이어 색상
 	player.speed = 7;//플레이어 속도
 	player.score = 0;//플레이어 초기 점수
 	player.life = 10;
 
+	// 총알
+	struct Bullet bullet;
+	bullet.sprite.setSize(Vector2f(10, 10));// 총알 크기
+	bullet.sprite.setPosition(player.x+60, player.y+15);// 총알 초기 위치 (임시 테스트)
+	bullet.speed = 20;// 총알 속도
+	bullet.is_fired = 0;// 총알 발사 여부 (0:false, 1:true)
 
 	// enemy
 	struct Enemy enemy[ENEMY_NUM];
-
 	// enemy 초기화
 	for (int i = 0; i < ENEMY_NUM; i++)
 	{
@@ -218,10 +234,12 @@ int main(void) {
 		{
 			if (enemy[i].life > 0)  window.draw(enemy[i].sprite);//적 보여주기
 		}
+
 		//화면이 열려져 있는 동안 계속 그려야 함
 		//draw는 나중에 호출할수록 우선순위가 높아짐
 		window.draw(player.sprite);//플레이어 보여주기(그려주기)
 		window.draw(text);
+		window.draw(bullet.sprite);// 총알 그리기
 
 		if (is_gameover)
 		{
