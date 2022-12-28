@@ -33,6 +33,14 @@ struct Enemy {
 	int respawn_time;
 };
 
+struct Textures {
+	Texture bg; // 배경 이미지
+	Texture gameover;// 게임 오버 이미지
+	Texture player;// 플레이어 이미지
+	Texture enemy;// 적 이미지
+	Texture bullet;// 총알 이미지
+};
+
 //obj1과 obj2의 충돌 여부 충돌하면 1로 반환 아니면 0으로 반환
 int is_collide(RectangleShape obj1, RectangleShape obj2) {
 	return obj1.getGlobalBounds().intersects(obj2.getGlobalBounds());
@@ -45,6 +53,14 @@ const int W_WIDTH = 1280, W_HEIGHT = 680;// 창의 크기
 const int GO_WIDTH = 880, GO_HEIGHT = 468;// 게임오버 그림의 크기
 
 int main(void) {
+
+	//이미지
+	struct Textures t;
+	t.bg.loadFromFile("./resources/image/background.jpg");
+	t.gameover.loadFromFile("./resources/image/gameover.png");
+	t.player.loadFromFile("./resources/image/player.png");
+	t.enemy.loadFromFile("./resources/image/enemy.png");
+	t.bullet.loadFromFile("./resources/image/bullet.png");
 
 	srand(time(NULL));//랜덤 함수 사용
 
@@ -78,43 +94,42 @@ int main(void) {
 	text.setPosition(0, 0);//텍스트 위치 0,0
 
 	//배경
-	Texture bg_texture;
-	bg_texture.loadFromFile("./resources/image/background.jpg");
 	Sprite bg_sprite;
-	bg_sprite.setTexture(bg_texture);
+	bg_sprite.setTexture(t.bg);
 	bg_sprite.setPosition(0, 0);
 
 	//gameover
-	Texture gameover_texture;
-	gameover_texture.loadFromFile("./resources/image/gameover.png");
 	Sprite gameover_sprite;
-	gameover_sprite.setTexture(gameover_texture);
-	gameover_sprite.setPosition((W_WIDTH-GO_WIDTH)/2, (W_HEIGHT-GO_HEIGHT)/2);//game over 그림 가운데 나타내기
+	gameover_sprite.setTexture(t.gameover);
+	gameover_sprite.setPosition(0,0);//game over 그림 가운데 나타내기
 
 	// 플레이어
 	struct Player player;
-	player.sprite.setSize(Vector2f(40, 40));//플레이어 사이즈
+	player.sprite.setTexture(&t.player);// 포인터를 넘겨주기 때문에 주소값 넘겨주기
+	player.sprite.setSize(Vector2f(150, 150));//플레이어 사이즈
 	player.sprite.setPosition(100, 100);//플레이어 시작 위치
 	player.x = player.sprite.getPosition().x;// x좌표
 	player.y = player.sprite.getPosition().y;// y좌표
-	player.sprite.setFillColor(Color::Red);//플레이어 색상
 	player.speed = 7;//플레이어 속도
 	player.score = 0;//플레이어 초기 점수
-	player.life = 10;
+	player.life = 1;
 
 	// 총알
 	struct Bullet bullet;
-	bullet.sprite.setSize(Vector2f(10, 10));// 총알 크기
+	bullet.sprite.setTexture(&t.bullet);// 포인터를 넘겨주기 때문에 주소값 넘겨주기
+	bullet.sprite.setSize(Vector2f(40, 40));// 총알 크기
 	bullet.sprite.setPosition(player.x+60, player.y+15);// 총알 초기 위치 (임시 테스트)
 	bullet.speed = 20;// 총알 속도
 	bullet.is_fired = 0;// 총알 발사 여부 (0:false, 1:true)
 
 	// enemy
 	struct Enemy enemy[ENEMY_NUM];
+
 	// enemy 초기화
 	for (int i = 0; i < ENEMY_NUM; i++)
 	{
 		// TODO : 굉장히 비효율적인 코드이므로 나중에 refactoring
+		enemy[i].sprite.setTexture(&t.enemy);// 포인터를 넘겨주기 때문에 주소값 넘겨주기
 		enemy[i].explosion_buffer.loadFromFile("./resources/sound/rumble.flac");
 		enemy[i].explosion_sound.setBuffer(enemy[i].explosion_buffer);
 		enemy[i].score = 100;
@@ -122,7 +137,6 @@ int main(void) {
 		enemy[i].sprite.setSize(Vector2f(70, 70));
 		enemy[i].sprite.setPosition(rand()%300+W_WIDTH*0.9, rand() % 380);// 90%부터 적들이 나옴
 		enemy[i].life = 1;
-		enemy[i].sprite.setFillColor(Color::Yellow);//적 색상
 		enemy[i].speed = -(rand() % 5 + 1);
 	}
 
