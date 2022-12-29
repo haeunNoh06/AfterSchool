@@ -80,6 +80,7 @@ int main(void) {
 
 	long start_time = clock();// 게임 시작 시간
 	long spent_time;// 게임 진행 시간
+	long fired_time = 0;// 최근 총알이 발사된 시간
 	int is_gameover = 0;
 
 	// BGM
@@ -125,6 +126,7 @@ int main(void) {
 	// 총알
 	int bullet_speed = 20;// 총알 속도
 	int bullet_idx = 0;// 발사될 때마다 인덱스 증가시킬 것
+	int bullet_delay = 500;	// 총알의 delay는 모두의 속성이므로 struct에 넣지 않음. 0.5초마다 나감
 
 	struct Bullet bullet[BULLET_NUM];
 	for (int i = 0; i < BULLET_NUM; i++)
@@ -182,6 +184,7 @@ int main(void) {
 			}
 		}
 
+
 		/* game 상태 update */
 		if (player.life <= 0)
 		{
@@ -232,12 +235,17 @@ int main(void) {
 		printf("bullet_idx %d\n", bullet_idx);
 		if (Keyboard::isKeyPressed(Keyboard::Space))
 		{
-			//총알이 발사 되어있지 않다면
-			if (!bullet[bullet_idx].is_fired)
+			// delay가 클 때 작동 ( 현재 시간과 발사 시간이 0.5초만큼의 차이가 나면 총알 발사)
+			if ( spent_time - fired_time > bullet_delay )
 			{
-				bullet[bullet_idx].sprite.setPosition(player.x + 110, player.y + 20);// 총알 초기 위치 (임시 테스트)
-				bullet[bullet_idx].is_fired = 1;
-				bullet_idx++;// 다음 총알 발사 가능하도록
+				//총알이 발사 되어있지 않다면 총알 발사
+				if (!bullet[bullet_idx].is_fired)
+				{
+					bullet[bullet_idx].sprite.setPosition(player.x + 110, player.y + 20);// 총알 초기 위치 (임시 테스트)
+					bullet[bullet_idx].is_fired = 1;
+					bullet_idx++;// 다음 총알 발사 가능하도록
+					fired_time = spent_time;// 총알 장전 (총을 쏜 뒤에 총을 쏜 시점과 현재의 시점을 동일시할 것)
+				}
 			}
 		}
 
@@ -312,11 +320,11 @@ int main(void) {
 		}
 
 		// 시작 시간은 변하지 않음
-		sprintf(info, "생명: %d 점수: %d 시간: %d\n", player.life, player.score, spent_time/1000);
+		sprintf(info, "♥: %d 점수: %d 시간: %d\n", player.life, player.score, spent_time/1000);
 
 		text.setString(info);
 
-		window.clear(Color::Black);//플레이어 자체 제거 (배경 지우기)
+		//window.clear(Color::Black);//플레이어 자체 제거 (배경 지우기)
 		window.draw(bg_sprite);
 
 		for (int i = 0; i < ENEMY_NUM; i++)
@@ -340,11 +348,6 @@ int main(void) {
 		{
 			window.draw(gameover_sprite);
 			// TODO : 게임이 멈추는 것을 구현할 것
-			player.sprite.move(0, 0);
-			for (int i = 0; i < 12; i++)
-			{
-
-			}
 		}
 
 		window.display();
