@@ -39,6 +39,7 @@ struct Item {
 	RectangleShape sprite;
 	int delay;
 	int is_presented;//아이템이 나타났는가
+	long presented_time;
 };
 
 struct Textures {
@@ -64,6 +65,7 @@ int is_collide(RectangleShape obj1, RectangleShape obj2) {
 // 전역변수 - const로 처리하여 중간에 값을 바꿀 수 없는 것만 전역변수로 세팅
 const int ENEMY_NUM = 10;// 적의 최대 갯수
 const int BULLET_NUM = 50;// 총알 최대 갯수
+const int ITEM_NUM = 2;// 아이템의 최대 종류
 const int W_WIDTH = 1280, W_HEIGHT = 575;// 창의 크기
 const int GO_WIDTH = 880, GO_HEIGHT = 468;// 게임오버 그림의 크기
 
@@ -167,16 +169,24 @@ int main(void) {
 		enemy[i].speed = -(rand() % 5 + 1);// 랜덤으로 주어지는 적의 속도
 	}
 
-	// item
-	struct Item item[2];
+	// item의 고유 특성
+	struct Item item[ITEM_NUM];
 	item[0].sprite.setTexture(&t.item_speed);// 이속 이미지 주소 설정
-	item[0].delay = 25000;// 25초마다 아이템 나옴
-	item[0].sprite.setSize(Vector2f(70,70));
-	item[0].is_presented = 1;
+	item[0].delay = 25000;// 25초마다 이속 아이템 나옴
+	item[1].sprite.setTexture(&t.item_delay);// 공속 이미지 주소 설정
+	item[1].delay = 20000;// 20초마다 공속 아이템 나옴
+
+	for (int i = 0; i < ITEM_NUM; i++)
+	{
+		// item의 공통 특성
+		item[0].sprite.setSize(Vector2f(70,70));
+		item[0].is_presented = 0;
+		item[0].presented_time = 0;// 아이템이 뜨지 않은 상태
+	}
 
 	//유지 시키는 방법은? -> 무한 반복
 	while (window.isOpen()) //윈도우창이 열려있는 동안 계속 반복
-	{ 
+	{
 		spent_time = clock() - start_time;// 시간이 지남에 따라 증가
 
 		//총알이 플레이어 따라다닐 수 있도록 
@@ -188,8 +198,8 @@ int main(void) {
 		{
 			switch (event.type)
 			{
-			//종료(x)버튼을 누르면 Event::Closed(0) 
-			case Event::Closed ://정수임
+				//종료(x)버튼을 누르면 Event::Closed(0) 
+			case Event::Closed://정수임
 				window.close();//윈도우창이 닫힘
 				break;
 			}
@@ -246,7 +256,7 @@ int main(void) {
 		if (Keyboard::isKeyPressed(Keyboard::Space))
 		{
 			// delay가 클 때 작동 ( 현재 시간과 발사 시간이 0.5초만큼의 차이가 나면 총알 발사)
-			if ( spent_time - fired_time > bullet_delay )
+			if (spent_time - fired_time > bullet_delay)
 			{
 				//총알이 발사 되어있지 않다면 총알 발사
 				if (!bullet[bullet_idx].is_fired)
@@ -275,7 +285,7 @@ int main(void) {
 		for (int i = 0; i < ENEMY_NUM; i++)
 		{
 			// 10초 마다 enemy가 젠
-			if (spent_time % (1000 * enemy_respawn_time ) < 1000 / 60 + 1) // 1초동안 60프레임이 반복되기 때문에
+			if (spent_time % (1000 * enemy_respawn_time) < 1000 / 60 + 1) // 1초동안 60프레임이 반복되기 때문에
 			{
 				// 게임이 진행중일때만 적이 나옴
 				if (!is_gameover)
@@ -284,10 +294,10 @@ int main(void) {
 					enemy[i].sprite.setPosition(rand() % 300 + W_WIDTH * 0.9, rand() % 505);// 90%부터 적들이 나옴
 					enemy[i].life = 1;
 					// 10초마다 enemy 속도 +1
-					enemy[i].speed = -(rand() % 3 + 1 + (spent_time/1000/enemy_respawn_time));
+					enemy[i].speed = -(rand() % 3 + 1 + (spent_time / 1000 / enemy_respawn_time));
 				}
 			}
-			
+
 			if (enemy[i].life > 0)
 			{
 				// enemy와의 충돌
@@ -332,9 +342,22 @@ int main(void) {
 		}
 
 		/* item update */
-		if (item[0].is_presented)
+		// TODO : item[1]이 안 뜸
+		for (int i = 0; i < ITEM_NUM; i++)
 		{
-			// TODO : 충돌 시 아이템 효과를 주고 사라진다
+			if (!item[i].is_presented)
+			{
+				if (spent_time - item[i].presented_time > item[i].delay)
+				{
+					item[i].sprite.setPosition(rand() % (W_WIDTH) * 0.8, rand() % W_HEIGHT * 0.8);
+					item[i].is_presented = 1;// 아이템이 뜸 (true)
+				}
+			}
+			if (item[i].is_presented)
+			{
+
+				// TODO : 충돌 시 아이템 효과를 주고 사라진다
+			}
 		}
 
 		// 시작 시간은 변하지 않음
