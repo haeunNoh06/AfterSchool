@@ -1,3 +1,11 @@
+/**
+*  TODO List
+* 1) 아이템 : 속도증가, 데미지 증가
+* 2) 총알 시스템 개편
+* 3) sound effect 개선
+*/
+
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <time.h>
@@ -18,7 +26,6 @@ struct Player {
 //총알
 struct Bullet {
 	RectangleShape sprite;
-	int speed;
 	int is_fired;// 발사 여부
 
 };
@@ -49,6 +56,7 @@ int is_collide(RectangleShape obj1, RectangleShape obj2) {
 
 // 전역변수 - const로 처리하여 중간에 값을 바꿀 수 없는 것만 전역변수로 세팅
 const int ENEMY_NUM = 10;// 적의 최대 갯수
+const int BULLET_NUM = 50;// 총알 최대 갯수
 const int W_WIDTH = 1280, W_HEIGHT = 575;// 창의 크기
 const int GO_WIDTH = 880, GO_HEIGHT = 468;// 게임오버 그림의 크기
 
@@ -115,12 +123,18 @@ int main(void) {
 	player.life = 1;
 
 	// 총알
-	struct Bullet bullet;
-	bullet.sprite.setTexture(&t.bullet);// 포인터를 넘겨주기 때문에 주소값 넘겨주기
-	bullet.sprite.setSize(Vector2f(40, 40));// 총알 크기
-	bullet.sprite.setPosition(player.x+110, player.y+20);// 총알 초기 위치 (임시 테스트)
-	bullet.speed = 20;// 총알 속도
-	bullet.is_fired = 0;// 총알 발사 여부 (0:false, 1:true)
+	int bullet_speed = 20;// 총알 속도
+	int bullet_idx = 0;// 발사될 때마다 인덱스 증가시킬 것
+
+	struct Bullet bullet[BULLET_NUM];
+	for (int i = 0; i < BULLET_NUM; i++)
+	{
+		bullet[i].sprite.setTexture(&t.bullet);// 포인터를 넘겨주기 때문에 주소값 넘겨주기
+		bullet[i].sprite.setSize(Vector2f(40, 40));// 총알 크기
+		bullet[i].sprite.setPosition(player.x+110, player.y+20);// 총알 초기 위치
+		bullet[i].is_fired = 0;// 총알 발사 여부 (0:false, 1:true)
+
+	}
 
 	// enemy
 	struct Enemy enemy[ENEMY_NUM];
@@ -172,6 +186,7 @@ int main(void) {
 		if (player.life <= 0)
 		{
 			is_gameover = 1;// 1 == true
+
 		}
 
 		/* player update */
@@ -203,10 +218,8 @@ int main(void) {
 		{
 			player.sprite.setPosition(W_WIDTH - 150, player.y);
 		}
-
 		if (player.y < 0)
 		{
-
 			player.sprite.setPosition(player.x, 0);
 		}
 		else if (player.y > W_HEIGHT - 150)
@@ -215,18 +228,26 @@ int main(void) {
 		}
 
 		/* bullet update */
+		// 총알 발사
+		printf("bullet_idx %d\n", bullet_idx);
 		if (Keyboard::isKeyPressed(Keyboard::Space))
 		{
 			//총알이 발사 되어있지 않다면
-			if (!bullet.is_fired)
-				bullet.sprite.setPosition(player.x + 110, player.y + 20);// 총알 초기 위치 (임시 테스트)
-			bullet.is_fired = 1;
+			if (!bullet[bullet_idx].is_fired)
+			{
+				bullet[bullet_idx].sprite.setPosition(player.x + 110, player.y + 20);// 총알 초기 위치 (임시 테스트)
+				bullet[bullet_idx].is_fired = 1;
+				bullet_idx++;// 다음 총알 발사 가능하도록
+			}
 		}
 
-		if (bullet.is_fired) {
-			bullet.sprite.move(bullet.speed, 0);
-			if (bullet.sprite.getPosition().x > W_WIDTH)
-				bullet.is_fired = 0;
+		for (int i = 0; i < BULLET_NUM; i++)
+		{
+			if (bullet[i].is_fired) {
+				bullet[i].sprite.move(bullet_speed, 0);
+				if (bullet[i].sprite.getPosition().x > W_WIDTH)
+					bullet[i].is_fired = 0;
+			}
 		}
 
 		//enemy와의 충돌
@@ -237,7 +258,7 @@ int main(void) {
 			if (spent_time % (1000 * enemy[i].respawn_time ) < 1000 / 60) // 1초동안 60프레임이 반복되기 때문에
 			{
 				enemy[i].sprite.setSize(Vector2f(70, 70));
-				enemy[i].sprite.setPosition(rand() % 300 + W_WIDTH * 0.9, rand() % 380);// 90%부터 적들이 나옴
+				enemy[i].sprite.setPosition(rand() % 300 + W_WIDTH * 0.9, rand() % 505);// 90%부터 적들이 나옴
 				enemy[i].life = 1;
 				// 10초마다 enemy 속도 +1
 				enemy[i].speed = -(rand() % 3 + 1 + (spent_time/1000/enemy[i].respawn_time));
@@ -246,7 +267,7 @@ int main(void) {
 			if (enemy[i].life > 0)
 			{
 				// enemy와의 충돌
-				if (is_collide(player.sprite, enemy[i].sprite) || is_collide(bullet.sprite, enemy[i].sprite)) 
+				if (is_collide(player.sprite, enemy[i].sprite) || is_collide(bullet[i].sprite, enemy[i].sprite))
 				{
 					enemy[i].life -= 1;//적의 생명 줄이기
 					player.score += enemy[i].score;
@@ -266,17 +287,23 @@ int main(void) {
 				}
 
 				// 총알과 enemy의 충돌
-				if (is_collide(bullet.sprite, enemy[i].sprite))
+				for (int j = 0; j < BULLET_NUM; j++)
 				{
-					enemy[i].life -= 1;
-					player.score += enemy[i].score;
-
-					// TODO : 코드 refactoring 필요
-					if (enemy[i].life == 0)
+					if (is_collide(bullet[j].sprite, enemy[i].sprite))
 					{
-						enemy[i].explosion_sound.play();
+						if (bullet[j].is_fired)
+						{
+							enemy[i].life -= 1;
+							player.score += enemy[i].score;
+
+							// TODO : 코드 refactoring 필요
+							if (enemy[i].life == 0)
+							{
+								enemy[i].explosion_sound.play();
+							}
+							bullet[j].is_fired = 0;
+						}
 					}
-					bullet.is_fired = 0;
 				}
 
 				enemy[i].sprite.move(enemy[i].speed, 0);
@@ -285,7 +312,7 @@ int main(void) {
 		}
 
 		// 시작 시간은 변하지 않음
-		sprintf(info, "life: %d score: %d time: %d\n", player.life, player.score, spent_time/1000);
+		sprintf(info, "생명: %d 점수: %d 시간: %d\n", player.life, player.score, spent_time/1000);
 
 		text.setString(info);
 
@@ -300,15 +327,24 @@ int main(void) {
 		//화면이 열려져 있는 동안 계속 그려야 함
 		//draw는 나중에 호출할수록 우선순위가 높아짐
 		window.draw(player.sprite);//플레이어 보여주기(그려주기)
-		if (bullet.is_fired)
-			window.draw(bullet.sprite);
 		window.draw(text);
-		window.draw(bullet.sprite);// 총알 그리기
+		window.draw(bullet[bullet_idx].sprite);// 총알 그리기
 
+		// 발사된 총알만 그리기
+		for (int i = 0; i < BULLET_NUM; i++)
+		{
+			if (bullet[i].is_fired)
+				window.draw(bullet[i].sprite);
+		}
 		if (is_gameover)
 		{
 			window.draw(gameover_sprite);
 			// TODO : 게임이 멈추는 것을 구현할 것
+			player.sprite.move(0, 0);
+			for (int i = 0; i < 12; i++)
+			{
+
+			}
 		}
 
 		window.display();
