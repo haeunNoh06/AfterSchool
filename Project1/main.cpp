@@ -203,6 +203,7 @@ int main(void) {
 		{
 			player.sprite.setPosition(W_WIDTH - 150, player.y);
 		}
+
 		if (player.y < 0)
 		{
 			player.sprite.setPosition(player.x, 0);
