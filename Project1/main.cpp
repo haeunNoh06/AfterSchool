@@ -27,7 +27,6 @@ struct Player {
 struct Bullet {
 	RectangleShape sprite;
 	int is_fired;// 발사 여부
-
 };
 
 struct Enemy {
@@ -53,7 +52,6 @@ int is_collide(RectangleShape obj1, RectangleShape obj2) {
 	return obj1.getGlobalBounds().intersects(obj2.getGlobalBounds());
 }
 
-
 // 전역변수 - const로 처리하여 중간에 값을 바꿀 수 없는 것만 전역변수로 세팅
 const int ENEMY_NUM = 10;// 적의 최대 갯수
 const int BULLET_NUM = 50;// 총알 최대 갯수
@@ -77,7 +75,6 @@ int main(void) {
 	RenderWindow window(VideoMode(W_WIDTH, W_HEIGHT), "AfterSchool");
 	window.setFramerateLimit(60);//1초에 60장 보여준다. 플레이어가 빨리 가지 않도록 하기
 
-
 	long start_time = clock();// 게임 시작 시간
 	long spent_time;// 게임 진행 시간
 	long fired_time = 0;// 최근 총알이 발사된 시간
@@ -93,7 +90,7 @@ int main(void) {
 
 	// text 폰트
 	Font font;
-	font.loadFromFile("C:\\Windows\\Fonts\\Arial.ttf");//C드라이브에 있는 폰트 가져오기
+	font.loadFromFile("C:\\Windows\\Fonts\\Candara.ttf");//C드라이브에 있는 폰트 가져오기
 
 	Text text;
 	char info[40];
@@ -121,7 +118,7 @@ int main(void) {
 	player.y = player.sprite.getPosition().y;// y좌표
 	player.speed = 7;//플레이어 속도
 	player.score = 0;//플레이어 초기 점수
-	player.life = 1;
+	player.life = 1;// 플레이어 생명
 
 	// 총알
 	int bullet_speed = 20;// 총알 속도
@@ -135,7 +132,6 @@ int main(void) {
 		bullet[i].sprite.setSize(Vector2f(40, 40));// 총알 크기
 		bullet[i].sprite.setPosition(player.x+110, player.y+20);// 총알 초기 위치
 		bullet[i].is_fired = 0;// 총알 발사 여부 (0:false, 1:true)
-
 	}
 
 	// enemy
@@ -146,14 +142,14 @@ int main(void) {
 	{
 		// TODO : 굉장히 비효율적인 코드이므로 나중에 refactoring
 		enemy[i].sprite.setTexture(&t.enemy);// 포인터를 넘겨주기 때문에 주소값 넘겨주기
-		enemy[i].explosion_buffer.loadFromFile("./resources/sound/rumble.flac");
+		enemy[i].explosion_buffer.loadFromFile("./resources/sound/rumble.flac");// 적 죽을 때 효과음
 		enemy[i].explosion_sound.setBuffer(enemy[i].explosion_buffer);
-		enemy[i].score = 100;
-		enemy[i].respawn_time = 8;
-		enemy[i].sprite.setSize(Vector2f(70, 70));
-		enemy[i].sprite.setPosition(rand()%300+W_WIDTH*0.9, rand() % 380);// 90%부터 적들이 나옴
-		enemy[i].life = 1;
-		enemy[i].speed = -(rand() % 5 + 1);
+		enemy[i].score = 100;// 죽일 때 나오는 점수
+		enemy[i].respawn_time = 8;// 다시 나타날 쿨타임
+		enemy[i].sprite.setSize(Vector2f(70, 70));// 적 크기
+		enemy[i].sprite.setPosition(rand()%300+W_WIDTH*0.9, rand() % 380);// 가로 화면의 90%부터 적들이 나옴
+		enemy[i].life = 1;// 적의 생명
+		enemy[i].speed = -(rand() % 5 + 1);// 랜덤으로 주어지는 적의 속도
 	}
 
 
@@ -176,11 +172,11 @@ int main(void) {
 				window.close();//윈도우창이 닫힘
 				break;
 			//키보드를 눌렀을 때 
-			case Event::KeyPressed: 
-			//case문 안에 변수를 선언할 때에는 중괄호를 쳐야 함
-			{
-				break;
-			}
+			//case Event::KeyPressed: 
+			////case문 안에 변수를 선언할 때에는 중괄호를 쳐야 함
+			//{
+			//	break;
+			//}
 			}
 		}
 
@@ -244,6 +240,7 @@ int main(void) {
 					bullet[bullet_idx].sprite.setPosition(player.x + 110, player.y + 20);// 총알 초기 위치 (임시 테스트)
 					bullet[bullet_idx].is_fired = 1;
 					bullet_idx++;// 다음 총알 발사 가능하도록
+					bullet_idx = bullet_idx % BULLET_NUM;// 50번 대신 idx가 0으로 바뀜
 					fired_time = spent_time;// 총알 장전 (총을 쏜 뒤에 총을 쏜 시점과 현재의 시점을 동일시할 것)
 				}
 			}
@@ -320,7 +317,7 @@ int main(void) {
 		}
 
 		// 시작 시간은 변하지 않음
-		sprintf(info, "♥: %d 점수: %d 시간: %d\n", player.life, player.score, spent_time/1000);
+		sprintf(info, "life: %d | score: %d | time: %d\n", player.life, player.score, spent_time/1000);
 
 		text.setString(info);
 
