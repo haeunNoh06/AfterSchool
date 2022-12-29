@@ -49,7 +49,7 @@ int is_collide(RectangleShape obj1, RectangleShape obj2) {
 
 // 전역변수 - const로 처리하여 중간에 값을 바꿀 수 없는 것만 전역변수로 세팅
 const int ENEMY_NUM = 10;// 적의 최대 갯수
-const int W_WIDTH = 1280, W_HEIGHT = 680;// 창의 크기
+const int W_WIDTH = 1280, W_HEIGHT = 575;// 창의 크기
 const int GO_WIDTH = 880, GO_HEIGHT = 468;// 게임오버 그림의 크기
 
 int main(void) {
@@ -118,14 +118,14 @@ int main(void) {
 	struct Bullet bullet;
 	bullet.sprite.setTexture(&t.bullet);// 포인터를 넘겨주기 때문에 주소값 넘겨주기
 	bullet.sprite.setSize(Vector2f(40, 40));// 총알 크기
-	bullet.sprite.setPosition(player.x+60, player.y+15);// 총알 초기 위치 (임시 테스트)
+	bullet.sprite.setPosition(player.x+110, player.y+20);// 총알 초기 위치 (임시 테스트)
 	bullet.speed = 20;// 총알 속도
 	bullet.is_fired = 0;// 총알 발사 여부 (0:false, 1:true)
 
 	// enemy
 	struct Enemy enemy[ENEMY_NUM];
 
-	// enemy 초기화
+	/* enemy update */
 	for (int i = 0; i < ENEMY_NUM; i++)
 	{
 		// TODO : 굉장히 비효율적인 코드이므로 나중에 refactoring
@@ -144,6 +144,12 @@ int main(void) {
 	//유지 시키는 방법은? -> 무한 반복
 	while (window.isOpen()) //윈도우창이 열려있는 동안 계속 반복
 	{ 
+		spent_time = clock() - start_time;// 시간이 지남에 따라 증가
+
+		//총알이 플레이어 따라다닐 수 있도록 
+		player.x = player.sprite.getPosition().x;	//플레이어 x좌표
+		player.y = player.sprite.getPosition().y;	//플레이어 y좌표
+
 		Event event;//이벤트 생성
 		while (window.pollEvent(event)) //이벤트가 발생. 이벤트가 발생해야 event 초기화가 됨
 		{
@@ -157,33 +163,22 @@ int main(void) {
 			case Event::KeyPressed: 
 			//case문 안에 변수를 선언할 때에는 중괄호를 쳐야 함
 			{
-				//space키 누르면 모든 enemy 다시 출현
-				//if (event.key.code == Keyboard::Space)
-				//{
-				//	for (int i = 0; i < ENEMY_NUM; i++)
-				//	{
-				//		enemy[i].sprite.setSize(Vector2f(70, 70));
-				//		enemy[i].sprite.setPosition(rand() % 300 + W_WIDTH*0.9, rand() % 380);
-				//		enemy[i].life = 1;
-				//		enemy[i].sprite.setFillColor(Color::Yellow);//적 색상
-				//	}
-				//}
 				break;
 			}
 			}
 		}
 
-		spent_time = clock() - start_time;// 시간이 지남에 따라 증가
+		/* game 상태 update */
+		if (player.life <= 0)
+		{
+			is_gameover = 1;// 1 == true
+		}
 
-		//총알이 플레이어럴 따라다닐 수 있도록 
-		player.x = player.sprite.getPosition().x;	//플레이어 x좌표
-		player.y = player.sprite.getPosition().y;	//플레이어 y좌표
-
-
+		/* player update */
 		//방향키
 		if (Keyboard::isKeyPressed(Keyboard::Left))
 		{
-			player.sprite.move(-1*player.speed, 0);//왼쪽 이동
+			player.sprite.move(-1 * player.speed, 0);//왼쪽 이동
 		}
 		if (Keyboard::isKeyPressed(Keyboard::Up))
 		{
@@ -197,13 +192,39 @@ int main(void) {
 		{
 			player.sprite.move(player.speed, 0);//오른쪽 이동
 		}
+
+		//player 이동 범위 제한
+		// TODO : 오른쪽 아래쪽 제한을 의도대로 고치기
+		if (player.x < 0)
+		{
+			player.sprite.setPosition(0, player.y);
+		}
+		else if (player.x > W_WIDTH - 150)
+		{
+			player.sprite.setPosition(W_WIDTH - 150, player.y);
+		}
+		if (player.y < 0)
+		{
+			player.sprite.setPosition(player.x, 0);
+		}
+		else if (player.y > W_HEIGHT - 150)
+		{
+			player.sprite.setPosition(player.x, W_HEIGHT - 150);
+		}
+
+		/* bullet update */
 		if (Keyboard::isKeyPressed(Keyboard::Space))
 		{
 			//총알이 발사 되어있지 않다면
 			if (!bullet.is_fired)
-				bullet.sprite.setPosition(player.x + 50, player.y + 15);
+				bullet.sprite.setPosition(player.x + 110, player.y + 20);// 총알 초기 위치 (임시 테스트)
 			bullet.is_fired = 1;
+		}
 
+		if (bullet.is_fired) {
+			bullet.sprite.move(bullet.speed, 0);
+			if (bullet.sprite.getPosition().x > W_WIDTH)
+				bullet.is_fired = 0;
 		}
 
 		//enemy와의 충돌
@@ -214,7 +235,6 @@ int main(void) {
 			if (spent_time % (1000 * enemy[i].respawn_time ) < 1000 / 60) // 1초동안 60프레임이 반복되기 때문에
 			{
 				enemy[i].sprite.setSize(Vector2f(70, 70));
-				enemy[i].sprite.setFillColor(Color::Yellow);//적 색상
 				enemy[i].sprite.setPosition(rand() % 300 + W_WIDTH * 0.9, rand() % 380);// 90%부터 적들이 나옴
 				enemy[i].life = 1;
 				// 10초마다 enemy 속도 +1
@@ -259,19 +279,6 @@ int main(void) {
 
 				enemy[i].sprite.move(enemy[i].speed, 0);
 			}
-
-		}
-
-		if (bullet.is_fired) {
-			bullet.sprite.move(bullet.speed, 0);
-			if (bullet.sprite.getPosition().x > W_WIDTH)
-				bullet.is_fired = 0;
-		}
-
-
-		if (player.life <= 0)
-		{
-			is_gameover = 1;// 1 == true
 
 		}
 
