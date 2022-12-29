@@ -39,11 +39,19 @@ struct Enemy {
 	int respawn_time;
 };
 
+struct Item {
+	RectangleShape sprite;
+	int delay;
+	int is_presented;//아이템이 나타났는가
+};
+
 struct Textures {
 	Texture bg; // 배경 이미지
-	Texture gameover;// 게임 오버 이미지
-	Texture player;// 플레이어 이미지
 	Texture enemy;// 적 이미지
+	Texture gameover;// 게임 오버 이미지
+	Texture item_delay;// 공속 아이템 이미지
+	Texture item_speed;// 이속 아이템 이미지
+	Texture player;// 플레이어 이미지
 	Texture bullet;// 총알 이미지
 };
 
@@ -63,12 +71,14 @@ int main(void) {
 	//이미지
 	struct Textures t;
 	t.bg.loadFromFile("./resources/image/background.jpg");
+	t.enemy.loadFromFile("./resources/image/enemy.png"); 
 	t.gameover.loadFromFile("./resources/image/gameover.png");
 	t.player.loadFromFile("./resources/image/player.png");
-	t.enemy.loadFromFile("./resources/image/enemy.png");
+	t.item_delay.loadFromFile("./resources/image/item_damage.png");
+	t.item_speed.loadFromFile("./resources/image/item_speed.png");
 	t.bullet.loadFromFile("./resources/image/bullet.png");
 
-	srand(time(NULL));//랜덤 함수 사용
+	srand(time(0));//랜덤 함수 사용
 
 	//640 x 480 윈도우 화면 나옴
 	//잠깐 떴다가 사라지는 건 return 0때문에 프로그램이 종료된 것
@@ -152,6 +162,12 @@ int main(void) {
 		enemy[i].speed = -(rand() % 5 + 1);// 랜덤으로 주어지는 적의 속도
 	}
 
+	// item
+	struct Item item[2];
+	item[0].sprite.setTexture(&t.item_speed);// 이속 이미지 주소 설정
+	item[0].delay = 25000;// 25초마다 아이템 나옴
+	item[0].sprite.setSize(Vector2f(70,70));
+	item[0].is_presented = 1;
 
 	//유지 시키는 방법은? -> 무한 반복
 	while (window.isOpen()) //윈도우창이 열려있는 동안 계속 반복
@@ -310,16 +326,22 @@ int main(void) {
 						}
 					}
 				}
-
 				enemy[i].sprite.move(enemy[i].speed, 0);
 			}
+		}
 
+		/* item update */
+		if (item[0].is_presented)
+		{
+			// TODO : 충돌 시 아이템 효과를 주고 사라진다
 		}
 
 		// 시작 시간은 변하지 않음
 		sprintf(info, "life: %d | score: %d | time: %d\n", player.life, player.score, spent_time/1000);
 
 		text.setString(info);
+		//화면이 열려져 있는 동안 계속 그려야 함
+		//draw는 나중에 호출할수록 우선순위가 높아짐
 
 		//window.clear(Color::Black);//플레이어 자체 제거 (배경 지우기)
 		window.draw(bg_sprite);
@@ -328,9 +350,8 @@ int main(void) {
 		{
 			if (enemy[i].life > 0)  window.draw(enemy[i].sprite);//적 보여주기
 		}
-
-		//화면이 열려져 있는 동안 계속 그려야 함
-		//draw는 나중에 호출할수록 우선순위가 높아짐
+		if (item[0].is_presented)
+			window.draw(item[0].sprite);
 		window.draw(player.sprite);//플레이어 보여주기(그려주기)
 		window.draw(text);
 		window.draw(bullet[bullet_idx].sprite);// 총알 그리기
