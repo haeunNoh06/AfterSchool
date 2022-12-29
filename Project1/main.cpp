@@ -206,6 +206,7 @@ int main(void) {
 
 		if (player.y < 0)
 		{
+
 			player.sprite.setPosition(player.x, 0);
 		}
 		else if (player.y > W_HEIGHT - 150)
