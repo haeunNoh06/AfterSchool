@@ -31,12 +31,8 @@ struct Bullet {
 
 struct Enemy {
 	RectangleShape sprite;
-	SoundBuffer explosion_buffer;
-	Sound explosion_sound;//소리에 대한 정보를 담음
 	int speed;
-	int score;
 	int life;
-	int respawn_time;
 };
 
 struct Item {
@@ -53,6 +49,11 @@ struct Textures {
 	Texture item_speed;// 이속 아이템 이미지
 	Texture player;// 플레이어 이미지
 	Texture bullet;// 총알 이미지
+};
+
+struct SBuffers {
+	SoundBuffer BGM;
+	SoundBuffer rumble;
 };
 
 //obj1과 obj2의 충돌 여부 충돌하면 1로 반환 아니면 0으로 반환
@@ -78,6 +79,11 @@ int main(void) {
 	t.item_speed.loadFromFile("./resources/image/item_speed.png");
 	t.bullet.loadFromFile("./resources/image/bullet.png");
 
+	// BGM
+	struct SBuffers sb;
+	sb.BGM.loadFromFile("./resources/sound/bgm.ogg");
+	sb.rumble.loadFromFile("./resources/sound/rumble.flac");// 적 죽을 때 효과음
+
 	srand(time(0));//랜덤 함수 사용
 
 	//640 x 480 윈도우 화면 나옴
@@ -91,10 +97,8 @@ int main(void) {
 	int is_gameover = 0;
 
 	// BGM
-	SoundBuffer BGM_buffer;
-	BGM_buffer.loadFromFile("./resources/sound/bgm.ogg");
 	Sound BGM_sound;
-	BGM_sound.setBuffer(BGM_buffer);
+	BGM_sound.setBuffer(sb.BGM);
 	BGM_sound.setLoop(1);// BGM 무한 반복
 	BGM_sound.play();
 
@@ -134,6 +138,8 @@ int main(void) {
 	int bullet_speed = 20;// 총알 속도
 	int bullet_idx = 0;// 발사될 때마다 인덱스 증가시킬 것
 	int bullet_delay = 500;	// 총알의 delay는 모두의 속성이므로 struct에 넣지 않음. 0.5초마다 나감
+	Sound bullet_sound;
+	bullet_sound.setBuffer(sb.rumble);
 
 	struct Bullet bullet[BULLET_NUM];
 	for (int i = 0; i < BULLET_NUM; i++)
@@ -146,16 +152,15 @@ int main(void) {
 
 	// enemy
 	struct Enemy enemy[ENEMY_NUM];
+	Sound enemy_explosion_sound;
+	enemy_explosion_sound.setBuffer(sb.rumble);
+	int enemy_score = 100;
+	int enemy_respawn_time = 8;
 
 	/* enemy update */
 	for (int i = 0; i < ENEMY_NUM; i++)
 	{
-		// TODO : 굉장히 비효율적인 코드이므로 나중에 refactoring
 		enemy[i].sprite.setTexture(&t.enemy);// 포인터를 넘겨주기 때문에 주소값 넘겨주기
-		enemy[i].explosion_buffer.loadFromFile("./resources/sound/rumble.flac");// 적 죽을 때 효과음
-		enemy[i].explosion_sound.setBuffer(enemy[i].explosion_buffer);
-		enemy[i].score = 100;// 죽일 때 나오는 점수
-		enemy[i].respawn_time = 8;// 다시 나타날 쿨타임
 		enemy[i].sprite.setSize(Vector2f(70, 70));// 적 크기
 		enemy[i].sprite.setPosition(rand()%300+W_WIDTH*0.9, rand() % 380);// 가로 화면의 90%부터 적들이 나옴
 		enemy[i].life = 1;// 적의 생명
@@ -187,12 +192,6 @@ int main(void) {
 			case Event::Closed ://정수임
 				window.close();//윈도우창이 닫힘
 				break;
-			//키보드를 눌렀을 때 
-			//case Event::KeyPressed: 
-			////case문 안에 변수를 선언할 때에는 중괄호를 쳐야 함
-			//{
-			//	break;
-			//}
 			}
 		}
 
@@ -224,7 +223,6 @@ int main(void) {
 		}
 
 		//player 이동 범위 제한
-		// TODO : 오른쪽 아래쪽 제한을 의도대로 고치기
 		if (player.x < 0)
 		{
 			player.sprite.setPosition(0, player.y);
@@ -257,6 +255,7 @@ int main(void) {
 					bullet[bullet_idx].is_fired = 1;
 					bullet_idx++;// 다음 총알 발사 가능하도록
 					bullet_idx = bullet_idx % BULLET_NUM;// 50번 대신 idx가 0으로 바뀜
+					bullet_sound.play();// 총알 발사 소리
 					fired_time = spent_time;// 총알 장전 (총을 쏜 뒤에 총을 쏜 시점과 현재의 시점을 동일시할 것)
 				}
 			}
@@ -276,13 +275,17 @@ int main(void) {
 		for (int i = 0; i < ENEMY_NUM; i++)
 		{
 			// 10초 마다 enemy가 젠
-			if (spent_time % (1000 * enemy[i].respawn_time ) < 1000 / 60) // 1초동안 60프레임이 반복되기 때문에
+			if (spent_time % (1000 * enemy_respawn_time ) < 1000 / 60 + 1) // 1초동안 60프레임이 반복되기 때문에
 			{
-				enemy[i].sprite.setSize(Vector2f(70, 70));
-				enemy[i].sprite.setPosition(rand() % 300 + W_WIDTH * 0.9, rand() % 505);// 90%부터 적들이 나옴
-				enemy[i].life = 1;
-				// 10초마다 enemy 속도 +1
-				enemy[i].speed = -(rand() % 3 + 1 + (spent_time/1000/enemy[i].respawn_time));
+				// 게임이 진행중일때만 적이 나옴
+				if (!is_gameover)
+				{
+					enemy[i].sprite.setSize(Vector2f(70, 70));
+					enemy[i].sprite.setPosition(rand() % 300 + W_WIDTH * 0.9, rand() % 505);// 90%부터 적들이 나옴
+					enemy[i].life = 1;
+					// 10초마다 enemy 속도 +1
+					enemy[i].speed = -(rand() % 3 + 1 + (spent_time/1000/enemy_respawn_time));
+				}
 			}
 			
 			if (enemy[i].life > 0)
@@ -291,12 +294,11 @@ int main(void) {
 				if (is_collide(player.sprite, enemy[i].sprite) || is_collide(bullet[i].sprite, enemy[i].sprite))
 				{
 					enemy[i].life -= 1;//적의 생명 줄이기
-					player.score += enemy[i].score;
+					player.score += enemy_score;
 
-					// TODO : 코드 refactoring 필요
 					if (enemy[i].life == 0)
 					{
-						enemy[i].explosion_sound.play();
+						enemy_explosion_sound.play();
 					}
 				}
 
@@ -315,12 +317,11 @@ int main(void) {
 						if (bullet[j].is_fired)
 						{
 							enemy[i].life -= 1;
-							player.score += enemy[i].score;
+							player.score += enemy_score;
 
-							// TODO : 코드 refactoring 필요
 							if (enemy[i].life == 0)
 							{
-								enemy[i].explosion_sound.play();
+								enemy_explosion_sound.play();
 							}
 							bullet[j].is_fired = 0;
 						}
@@ -354,7 +355,6 @@ int main(void) {
 			window.draw(item[0].sprite);
 		window.draw(player.sprite);//플레이어 보여주기(그려주기)
 		window.draw(text);
-		window.draw(bullet[bullet_idx].sprite);// 총알 그리기
 
 		// 발사된 총알만 그리기
 		for (int i = 0; i < BULLET_NUM; i++)
