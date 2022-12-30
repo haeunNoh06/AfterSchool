@@ -63,6 +63,12 @@ struct SBuffers {
 	SoundBuffer BGM;
 	SoundBuffer rumble;
 	SoundBuffer item;
+	SoundBuffer gameover;
+};
+
+struct Gameover {
+	Sound sound;
+	Sprite sprite;
 };
 
 //obj1과 obj2의 충돌 여부 충돌하면 1로 반환 아니면 0으로 반환
@@ -94,6 +100,7 @@ int main(void) {
 	sb.BGM.loadFromFile("./resources/sound/bgm.ogg");
 	sb.rumble.loadFromFile("./resources/sound/rumble.flac");// 적 죽을 때 효과음
 	sb.item.loadFromFile("./resources/sound/item.flac");// item얻을 때 효과음
+	sb.gameover.loadFromFile("./resources/sound/gameover.flac");
 
 	srand(time(0));//랜덤 함수 사용
 
@@ -130,9 +137,10 @@ int main(void) {
 	bg_sprite.setPosition(0, 0);
 
 	//gameover
-	Sprite gameover_sprite;
-	gameover_sprite.setTexture(t.gameover);
-	gameover_sprite.setPosition(0,0);//game over 그림 가운데 나타내기
+	struct Gameover gameover;
+	gameover.sprite.setTexture(t.gameover);
+	gameover.sprite.setPosition(0,0);//game over 그림 가운데 나타내기
+	gameover.sound.setBuffer(sb.gameover);
 
 	// 플레이어
 	struct Player player;
@@ -225,6 +233,8 @@ int main(void) {
 		if (player.life <= 0)
 		{
 			is_gameover = 1;// 1 == true
+			BGM_sound.setLoop(0);// 배경음악 종료
+			gameover.sound.play();// gameover 효과음
 		}
 
 		/* player update */
@@ -427,7 +437,7 @@ int main(void) {
 		}
 		if (is_gameover)
 		{
-			window.draw(gameover_sprite);
+			window.draw(gameover.sprite);
 			// TODO : 게임이 멈추는 것을 구현할 것
 		}
 
