@@ -5,7 +5,6 @@
 * 3) sound effect 개선
 */
 
-
 #include <stdio.h>
 #include <stdlib.h>
 #include <time.h>
@@ -39,7 +38,7 @@ struct Item {
 	RectangleShape sprite;
 	int delay;
 	int is_presented;//아이템이 나타났는가
-	long presented_time;
+	long presented_time;//나타난 시간
 };
 
 struct Textures {
@@ -179,9 +178,9 @@ int main(void) {
 	for (int i = 0; i < ITEM_NUM; i++)
 	{
 		// item의 공통 특성
-		item[0].sprite.setSize(Vector2f(70,70));
-		item[0].is_presented = 0;
-		item[0].presented_time = 0;// 아이템이 뜨지 않은 상태
+		item[i].sprite.setSize(Vector2f(70,70));
+		item[i].is_presented = 0;
+		item[i].presented_time = 0;// 아이템이 뜨지 않은 상태
 	}
 
 	//유지 시키는 방법은? -> 무한 반복
@@ -210,7 +209,6 @@ int main(void) {
 		if (player.life <= 0)
 		{
 			is_gameover = 1;// 1 == true
-
 		}
 
 		/* player update */
@@ -342,7 +340,6 @@ int main(void) {
 		}
 
 		/* item update */
-		// TODO : item[1]이 안 뜸
 		for (int i = 0; i < ITEM_NUM; i++)
 		{
 			if (!item[i].is_presented)
@@ -374,8 +371,13 @@ int main(void) {
 		{
 			if (enemy[i].life > 0)  window.draw(enemy[i].sprite);//적 보여주기
 		}
-		if (item[0].is_presented)
-			window.draw(item[0].sprite);
+
+		// 아이템 그려주기
+		for (int i = 0; i < ITEM_NUM; i++)
+		{
+			if (item[i].is_presented)
+				window.draw(item[i].sprite);
+		}
 		window.draw(player.sprite);//플레이어 보여주기(그려주기)
 		window.draw(text);
 
