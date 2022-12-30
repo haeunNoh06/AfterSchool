@@ -62,6 +62,7 @@ struct Textures {
 struct SBuffers {
 	SoundBuffer BGM;
 	SoundBuffer rumble;
+	SoundBuffer item;
 };
 
 //obj1과 obj2의 충돌 여부 충돌하면 1로 반환 아니면 0으로 반환
@@ -92,6 +93,7 @@ int main(void) {
 	struct SBuffers sb;
 	sb.BGM.loadFromFile("./resources/sound/bgm.ogg");
 	sb.rumble.loadFromFile("./resources/sound/rumble.flac");// 적 죽을 때 효과음
+	sb.item.loadFromFile("./resources/sound/item.flac");// item얻을 때 효과음
 
 	srand(time(0));//랜덤 함수 사용
 
@@ -180,6 +182,8 @@ int main(void) {
 
 	// item의 고유 특성
 	struct Item item[ITEM_NUM];
+	Sound item_sound;
+	item_sound.setBuffer(sb.item);
 	item[0].sprite.setTexture(&t.item_speed);// 이속 이미지 주소 설정
 	item[0].delay = 25000;// 25초마다 이속 아이템 나옴
 	item[0].type = SPEED;
@@ -363,12 +367,12 @@ int main(void) {
 			}
 			if (item[i].is_presented)
 			{
-				if (is_collide(player.sprite, item[i].sprite))// 사람하고 아이템이 부딪히면 충돌 효과
+				// 아이템 획득 시 효과를 얻고 사라진다
+				if (is_collide(player.sprite, item[i].sprite))
 				{
 					switch (item[i].type)
 					{
 					case SPEED: // 이속 아이템
-						printf("player_speed : %d\n", player.speed);
 						player.speed += 2;// player 속도 증가
 						if (player.speed > player.speed_max)
 						{
@@ -376,7 +380,6 @@ int main(void) {
 						}
 						break;
 					case DELAY: // 공속 아이템
-						printf("bullet_delay : %d\n", bullet_delay);
 						bullet_delay -= 100;// 총알 딜레이 줄이기
 						if (bullet_delay < bullet_delay_max)
 						{
@@ -384,6 +387,7 @@ int main(void) {
 						}
 						break;
 					}
+					item_sound.play();
 					// 사라지는 코드
 					item[i].is_presented = 0;
 					item[i].presented_time = spent_time;// 아이템을 먹는 순간 다시 쿨타임 시간 적용
