@@ -36,9 +36,10 @@ struct Enemy {
 
 struct Item {
 	RectangleShape sprite;
-	int delay;
+	int delay;// 쿨타임
 	int is_presented;//아이템이 나타났는가
 	long presented_time;//나타난 시간
+	int type;// 아이템 타입
 };
 
 struct Textures {
@@ -172,8 +173,10 @@ int main(void) {
 	struct Item item[ITEM_NUM];
 	item[0].sprite.setTexture(&t.item_speed);// 이속 이미지 주소 설정
 	item[0].delay = 25000;// 25초마다 이속 아이템 나옴
+	item[0].type = 0;
 	item[1].sprite.setTexture(&t.item_delay);// 공속 이미지 주소 설정
 	item[1].delay = 20000;// 20초마다 공속 아이템 나옴
+	item[1].type = 1;
 
 	for (int i = 0; i < ITEM_NUM; i++)
 	{
@@ -342,9 +345,9 @@ int main(void) {
 		/* item update */
 		for (int i = 0; i < ITEM_NUM; i++)
 		{
-			if (!item[i].is_presented)
+			if (!item[i].is_presented)// 아이템이 나타나지 않았으면
 			{
-				if (spent_time - item[i].presented_time > item[i].delay)
+				if (spent_time - item[i].presented_time > item[i].delay)// 각각의 delay초보다 더 많은 시간이 지나면
 				{
 					item[i].sprite.setPosition(rand() % (W_WIDTH) * 0.8, rand() % W_HEIGHT * 0.8);
 					item[i].is_presented = 1;// 아이템이 뜸 (true)
@@ -352,8 +355,21 @@ int main(void) {
 			}
 			if (item[i].is_presented)
 			{
-
-				// TODO : 충돌 시 아이템 효과를 주고 사라진다
+				if (is_collide(player.sprite, item[i].sprite))// 사람하고 아이템이 부딪히면 충돌 효과
+				{
+					switch (item[i].type)
+					{
+					case 0: // 이속 아이템
+						player.speed += 2;// player 속도 증가
+						break;
+					case 1: // 공속 아이템
+						bullet_delay -= 100;// 총알 딜레이 줄이기
+						break;
+					}
+					// 사라지는 코드
+					item[i].is_presented = 0;
+					item[i].presented_time = spent_time;// 아이템을 먹는 순간 다시 쿨타임 시간 적용
+				}
 			}
 		}
 
