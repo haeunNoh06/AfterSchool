@@ -16,7 +16,8 @@ using namespace sf;
 
 struct Player {
 	RectangleShape sprite;// sprite : 그림이 되는 부분
-	int speed;
+	int speed;// 이속
+	int speed_max;// 이속 최대치
 	int score;
 	int life;
 	float x, y;// player 좌표
@@ -34,12 +35,18 @@ struct Enemy {
 	int life;
 };
 
+// 열거형
+enum item_type {
+	SPEED,// 0
+	DELAY// 1
+};
+
 struct Item {
 	RectangleShape sprite;
 	int delay;// 쿨타임
 	int is_presented;//아이템이 나타났는가
 	long presented_time;//나타난 시간
-	int type;// 아이템 타입
+	enum item_type type;// 아이템 타입
 };
 
 struct Textures {
@@ -133,13 +140,15 @@ int main(void) {
 	player.x = player.sprite.getPosition().x;// x좌표
 	player.y = player.sprite.getPosition().y;// y좌표
 	player.speed = 7;//플레이어 속도
+	player.speed_max = 10;// 이속 최대값
 	player.score = 0;//플레이어 초기 점수
-	player.life = 1;// 플레이어 생명
+	player.life = 5;// 플레이어 생명
 
 	// 총알
 	int bullet_speed = 20;// 총알 속도
 	int bullet_idx = 0;// 발사될 때마다 인덱스 증가시킬 것
 	int bullet_delay = 500;	// 총알의 delay는 모두의 속성이므로 struct에 넣지 않음. 0.5초마다 나감
+	int bullet_delay_max = 100;// 총알의 delay 최대값
 	Sound bullet_sound;
 	bullet_sound.setBuffer(sb.rumble);
 
@@ -173,10 +182,10 @@ int main(void) {
 	struct Item item[ITEM_NUM];
 	item[0].sprite.setTexture(&t.item_speed);// 이속 이미지 주소 설정
 	item[0].delay = 25000;// 25초마다 이속 아이템 나옴
-	item[0].type = 0;
+	item[0].type = SPEED;
 	item[1].sprite.setTexture(&t.item_delay);// 공속 이미지 주소 설정
 	item[1].delay = 20000;// 20초마다 공속 아이템 나옴
-	item[1].type = 1;
+	item[1].type = DELAY;
 
 	for (int i = 0; i < ITEM_NUM; i++)
 	{
@@ -253,7 +262,6 @@ int main(void) {
 
 		/* bullet update */
 		// 총알 발사
-		printf("bullet_idx %d\n", bullet_idx);
 		if (Keyboard::isKeyPressed(Keyboard::Space))
 		{
 			// delay가 클 때 작동 ( 현재 시간과 발사 시간이 0.5초만큼의 차이가 나면 총알 발사)
@@ -359,11 +367,21 @@ int main(void) {
 				{
 					switch (item[i].type)
 					{
-					case 0: // 이속 아이템
+					case SPEED: // 이속 아이템
+						printf("player_speed : %d\n", player.speed);
 						player.speed += 2;// player 속도 증가
+						if (player.speed > player.speed_max)
+						{
+							player.speed = player.speed_max;
+						}
 						break;
-					case 1: // 공속 아이템
+					case DELAY: // 공속 아이템
+						printf("bullet_delay : %d\n", bullet_delay);
 						bullet_delay -= 100;// 총알 딜레이 줄이기
+						if (bullet_delay < bullet_delay_max)
+						{
+							bullet_delay = bullet_delay_max;
+						}
 						break;
 					}
 					// 사라지는 코드
