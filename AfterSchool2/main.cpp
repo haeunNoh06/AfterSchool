@@ -16,6 +16,18 @@ int main(void) {
 	Vector2i mouse_pos;// 마우스 좌표
 	int click_cnt = 0;// 마우스 누른 횟수
 
+	// 폰트
+	Font font;
+	font.loadFromFile("c:/Windows/Fonts/arial.ttf");
+
+	// 텍스트
+	Text text;
+	text.setFont(font);
+	text.setCharacterSize(30);// 글자 크기
+	text.setFillColor(Color::White);
+	text.setPosition(0, 0);
+	char info[40];
+
 	while (window.isOpen())
 	{
 		mouse_pos = Mouse::getPosition(window);// 마우스 좌표 실시간으로 받기
@@ -30,23 +42,22 @@ int main(void) {
 				break;
 			// 한 번 누르면 한 번만 적용
 			case Event::MouseButtonPressed:
-				if (event.mouseButton.button == Mouse::Right)
+				if (event.mouseButton.button == Mouse::Left)
 				{
 					click_cnt++;
 				}
 			}
 		}
+		
+		sprintf(info, "(%d, %d) clicks %d\n", mouse_pos.x, mouse_pos.y, click_cnt);
+		text.setString(info);
+		
+		window.clear(Color::Black);
 
-		//마우스 위치는 하나밖에 없음
-		//왼쪽이 눌렸다면
-		//마우스 누른 상태면 여러번 증가함
-		if (Mouse::isButtonPressed(Mouse::Left))
-		{
-			click_cnt++;
-		}
+		window.draw(text);
 
-		printf("(%d, %d) 클릭 횟수 : %d\n", mouse_pos.x, mouse_pos.y, click_cnt);// 마우스 x값 y값 출력
+		window.display();
+		
 	}
-
 	return 0;
 }
