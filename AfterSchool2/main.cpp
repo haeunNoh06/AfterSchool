@@ -6,6 +6,15 @@
 
 using namespace sf;
 
+const int row = 4;
+const int CARD_W = 200;
+const int CARD_H = 200;
+
+struct Card {
+	RectangleShape sprite;
+	int id;
+};
+
 int main(void) {
 
 	RenderWindow window(VideoMode(1200, 800), "AfterSchool2");// 화면 크기, 제목
@@ -27,6 +36,17 @@ int main(void) {
 	text.setFillColor(Color::White);
 	text.setPosition(0, 0);
 	char info[40];
+
+	struct Card cards[row][row];
+	for (int i = 0; i < row; i++)
+	{
+		for (int j = 0; j < row; j++)
+		{
+			cards[i][j].sprite.setSize(Vector2f(CARD_W, CARD_H));
+			cards[i][j].sprite.setPosition(j * CARD_W, i * CARD_H);// j가 커질수록 x값이 100증가, i가 커질수록 y값이 200증가
+			cards[i][j].sprite.setFillColor(Color(i * 64, j * 64, 128));
+		}
+	}
 
 	while (window.isOpen())
 	{
@@ -55,6 +75,14 @@ int main(void) {
 		window.clear(Color::Black);
 
 		window.draw(text);
+		
+		for (int i = 0; i < row; i++)
+		{
+			for (int j = 0; j < row; j++)
+			{
+				window.draw(cards[i][j].sprite);
+			}
+		}
 
 		window.display();
 		
