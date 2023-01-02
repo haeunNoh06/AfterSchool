@@ -45,7 +45,7 @@ int main(void) {
 	Text text;
 	text.setFont(font);
 	text.setCharacterSize(30);// 글자 크기
-	text.setFillColor(Color::White);
+	text.setFillColor(Color::Black);
 	text.setPosition(0, 0);
 	char info[40];
 
@@ -81,41 +81,62 @@ int main(void) {
 			case Event::MouseButtonPressed:
 				if (event.mouseButton.button == Mouse::Left)
 				{
-					flipped_num++;// 필요없는 코드
 					for (int i = 0; i < row; i++)
 					{
 						for (int j = 0; j < row; j++)
 						{
-							// 마우스는 점이므로 충돌이 아닌 포함관계를 나타내야 함
+							// 마우스 위치가 cards[i][j]의 위치에 해당한다면?
 							if (cards[i][j].sprite.getGlobalBounds().contains(mouse_pos.x, mouse_pos.y))
 							{
-								cards[i][j].is_clicked = 1;// true
+								// 뒤집히지 않은 카드만 뒤집겠다
+								if ( cards[i][j].is_clicked == 0 )
+								{
+									cards[i][j].is_clicked = 1;// true
+									flipped_num++;// 뒤집혀진 카드 갯수
+								}
 							}
 						}
 					}
 				}
 			}
 		}
-		
+
 		for (int i = 0; i < row; i++)
 		{
 			for (int j = 0; j < row; j++)
 			{
 				// 클릭하면 카드 뒤집기
-				if (cards[i][j].is_clicked)
+				if (cards[i][j].is_clicked == 1 )
 				{
-					// 그림이 있는 스프라이트로 변경
+					// 그림이 있는 스프라이트로 변경 (카드를 뒤집겠다는 의미)
 					cards[i][j].sprite.setTexture(&t[cards[i][j].type]);
 				}
+				else
+				{
+					// 카드는 ??? 상태
+					cards[i][j].sprite.setTexture(&t[0]);
+				}
 			}
+		}
+
+		// 나중에 지울거임
+		// 뒤집힌 카드가 2개라면 TODO : 두 번째 카드는 바로 다시 뒤집혀지지 않게 하기
+		if (flipped_num == 2)
+		{
+			for (int i = 0; i < row; i++)
+			{
+				for (int j = 0; j < row; j++)
+				{
+					cards[i][j].is_clicked = 0;
+				}
+			}
+			flipped_num = 0;
 		}
 
 		sprintf(info, "(%d, %d) clicks %d\n", mouse_pos.x, mouse_pos.y, flipped_num);
 		text.setString(info);
 		
 		window.clear(Color::Black);
-
-		window.draw(text);
 		
 		for (int i = 0; i < row; i++)
 		{
@@ -124,6 +145,8 @@ int main(void) {
 				window.draw(cards[i][j].sprite);
 			}
 		}
+
+		window.draw(text);
 
 		window.display();
 		
