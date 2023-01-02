@@ -19,6 +19,13 @@ struct Card {
 	int is_cleared;// 정답을 맞춘 카드인가
 };
 
+void swap_card(struct Card* c1, struct Card* c2)
+{
+	struct Card tmp = *c1;
+	*c1 = *c2;
+	*c2 = tmp;
+}
+
 int main(void) {
 
 	RenderWindow window(VideoMode(1200, 800), "AfterSchool2");// 화면 크기, 제목
@@ -32,6 +39,8 @@ int main(void) {
 	long start_time;// 프로그램 시작 시각
 	long spent_time;// 현재 시각
 	long delay_time;// 바로 다시 ? 로 뒤집혀지지 않도록 딜레이를 줌
+
+	srand(time(0));
 
 	Texture t[8 + 1];
 	t[0].loadFromFile("./resources/images/ch0.png");
@@ -66,11 +75,27 @@ int main(void) {
 			cards[i][j].sprite.setPosition(j * CARD_W, i * CARD_H);// j가 커질수록 x값이 100증가, i가 커질수록 y값이 200증가
 			cards[i][j].sprite.setTexture(&t[0]);// 뒤집는 그림이 0이기 때문에 1부터
 			cards[i][j].type = 1 + n / 2;
-			cards[i][j].id_i = i;
-			cards[i][j].id_j = j;
+			// id초기화 없어짐, 섞은 후 id값은 나중에 주기
 			cards[i][j].is_clicked = 0;
 			cards[i][j].is_cleared = 0;// 아직 깨지 않았으므로 0임
 			n++;
+		}
+	}
+
+	// 카드 100번 섞기
+	for (int i = 0; i < 100; i++)
+	{
+		swap_card(&cards[rand() % row][rand() % row], &cards[rand()%row][rand()%row]);
+	}
+
+	// 인덱스에 맞춰id값, 위치 재조정
+	for (int i = 0; i < row; i++)
+	{
+		for (int j = 0; j < row; j++)
+		{
+			cards[i][j].id_i = i;
+			cards[i][j].id_j = j;
+			cards[i][j].sprite.setPosition(j*CARD_W, i*CARD_H);
 		}
 	}
 
@@ -173,7 +198,7 @@ int main(void) {
 			}
 		}
 
-		sprintf(info, "(%d, %d) spent_time %d delay_time %d\n", mouse_pos.x, mouse_pos.y, spent_time/1000, delay_time/1000);
+		sprintf(info, "time: %d\n", spent_time/1000);
 		text.setString(info);
 		
 		window.clear(Color::Black);
