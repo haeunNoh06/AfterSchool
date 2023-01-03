@@ -51,7 +51,7 @@ int main(void) {
 	long delay_time;// 바로 다시 ? 로 뒤집혀지지 않도록 딜레이를 줌
 
 	struct Gameclear clear;
-	int is_clear;// 게임 종료 여부
+	int gameclear;// 게임 종료 여부
 	int start = 1;// 게임 다시 시작 여부
 
 	srand(time(0));
@@ -87,6 +87,7 @@ int main(void) {
 	{
 		if (start == 1)
 		{
+			gameclear = 0;// 게임 클리어 여부
 			flipped_num = 0;// 현재 뒤집혀진 카드의 갯수
 			cleared_num = 0;// 정답인 카드 갯수
 			n = 0;
@@ -128,7 +129,8 @@ int main(void) {
 		start = 0;
 
 		mouse_pos = Mouse::getPosition(window);// 마우스 좌표 실시간으로 받기
-		spent_time = clock() - start_time;
+		if ( gameclear == 0 )
+			spent_time = clock() - start_time;
 
 		Event event;
 		while (window.pollEvent(event))
@@ -235,7 +237,7 @@ int main(void) {
 		// 게임 종료
 		if (cleared_num == 16)
 		{
-			is_clear = 1;
+			gameclear = 1;
 			clear.sprite.setTexture(t.gameclear);
 			window.draw(clear.sprite);
 		}
@@ -252,7 +254,6 @@ int main(void) {
 					window.draw(cards[i][j].sprite);
 				}
 			}
-			cleared_num = 0;
 		}
 
 		window.draw(text);
