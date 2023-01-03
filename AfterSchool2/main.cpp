@@ -7,7 +7,7 @@
 using namespace sf;
 
 const int row = 4;
-const int CARD_W = 300;
+const int CARD_W = 200;
 const int CARD_H = 200;
 
 struct Card {
@@ -17,6 +17,15 @@ struct Card {
 	int type;
 	int is_clicked;// 눌렸는가
 	int is_cleared;// 정답을 맞춘 카드인가
+};
+
+struct Textures {
+	Texture img[8 + 1];
+	Texture gameclear;
+};
+
+struct Gameclear {
+	Sprite sprite;
 };
 
 void swap_card(struct Card* c1, struct Card* c2)
@@ -35,23 +44,28 @@ int main(void) {
 	// Vector2i : 정수
 	Vector2i mouse_pos;// 마우스 좌표
 	int flipped_num = 0;// 현재 뒤집혀진 카드의 갯수
+	int cleared_num = 0;// 정답인 카드 갯수
 
 	long start_time;// 프로그램 시작 시각
 	long spent_time;// 현재 시각
 	long delay_time;// 바로 다시 ? 로 뒤집혀지지 않도록 딜레이를 줌
 
+	struct Gameclear clear;
+	int is_gameover;// 게임 종료 여부
+
 	srand(time(0));
 
-	Texture t[8 + 1];
-	t[0].loadFromFile("./resources/images/ch0.png");
-	t[1].loadFromFile("./resources/images/ch1.png");
-	t[2].loadFromFile("./resources/images/ch2.png");
-	t[3].loadFromFile("./resources/images/ch3.png");
-	t[4].loadFromFile("./resources/images/ch4.png");
-	t[5].loadFromFile("./resources/images/ch5.png");
-	t[6].loadFromFile("./resources/images/ch6.png");
-	t[7].loadFromFile("./resources/images/ch7.png");
-	t[8].loadFromFile("./resources/images/ch8.png");
+	struct Textures t;
+	t.img[0].loadFromFile("./resources/images/ch0.png");
+	t.img[1].loadFromFile("./resources/images/ch1.png");
+	t.img[2].loadFromFile("./resources/images/ch2.png");
+	t.img[3].loadFromFile("./resources/images/ch3.png");
+	t.img[4].loadFromFile("./resources/images/ch4.png");
+	t.img[5].loadFromFile("./resources/images/ch5.png");
+	t.img[6].loadFromFile("./resources/images/ch6.png");
+	t.img[7].loadFromFile("./resources/images/ch7.png");
+	t.img[8].loadFromFile("./resources/images/ch8.png");
+	t.gameclear.loadFromFile("./resources/images/gameclear.png");
 
 	Font font;
 	font.loadFromFile("c:/Windows/Fonts/arial.ttf");
@@ -73,7 +87,7 @@ int main(void) {
 		{
 			cards[i][j].sprite.setSize(Vector2f(CARD_W, CARD_H));
 			cards[i][j].sprite.setPosition(j * CARD_W, i * CARD_H);// j가 커질수록 x값이 100증가, i가 커질수록 y값이 200증가
-			cards[i][j].sprite.setTexture(&t[0]);// 뒤집는 그림이 0이기 때문에 1부터
+			cards[i][j].sprite.setTexture(&t.img[0]);// 뒤집는 그림이 0이기 때문에 1부터
 			cards[i][j].type = 1 + n / 2;
 			// id초기화 없어짐, 섞은 후 id값은 나중에 주기
 			cards[i][j].is_clicked = 0;
@@ -95,7 +109,7 @@ int main(void) {
 		{
 			cards[i][j].id_i = i;
 			cards[i][j].id_j = j;
-			cards[i][j].sprite.setPosition(j*CARD_W, i*CARD_H);
+			cards[i][j].sprite.setPosition(j*CARD_W+200, i*CARD_H);
 		}
 	}
 
@@ -146,6 +160,7 @@ int main(void) {
 											// 현재 카드와 기준카드가 같으면 둘 다 정답임을 나타냄
 											cards[i][j].is_cleared = 1;
 											cards[compare_card.id_i][compare_card.id_j].is_cleared = 1;
+											cleared_num += 2;// 정답인 카드 2개 추가
 										}
 										// 두 카드가 다른 종류이면
 										else
@@ -170,12 +185,12 @@ int main(void) {
 				if (cards[i][j].is_clicked == 1 || cards[i][j].is_cleared == 1 )
 				{
 					// 그림이 있는 스프라이트로 변경 (카드를 뒤집겠다는 의미)
-					cards[i][j].sprite.setTexture(&t[cards[i][j].type]);
+					cards[i][j].sprite.setTexture(&t.img[cards[i][j].type]);
 				}
 				else
 				{
 					// 카드는 ??? 상태
-					cards[i][j].sprite.setTexture(&t[0]);
+					cards[i][j].sprite.setTexture(&t.img[0]);
 				}
 			}
 		}
@@ -201,7 +216,7 @@ int main(void) {
 		sprintf(info, "time: %d\n", spent_time/1000);
 		text.setString(info);
 		
-		window.clear(Color::Black);
+		window.clear(Color::White);
 		
 		for (int i = 0; i < row; i++)
 		{
@@ -209,6 +224,14 @@ int main(void) {
 			{
 				window.draw(cards[i][j].sprite);
 			}
+		}
+
+		// 게임 종료
+		if (cleared_num == 16)
+		{
+			is_gameover = 1;
+			clear.sprite.setTexture(t.gameclear);
+			window.draw(clear.sprite);
 		}
 
 		window.draw(text);
