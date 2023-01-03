@@ -10,6 +10,7 @@
 #include <time.h>
 #include <SFML/Graphics.hpp>
 #include <SFML/Audio.hpp>//SoundBuffer 사용
+#include <SFML/Audio/SoundSource.hpp>
 //#include <Windows.h>// sleep() 사용
 
 using namespace sf;
@@ -67,13 +68,33 @@ struct SBuffers {
 };
 
 struct Gameover {
-	Sound sound;
 	Sprite sprite;
 };
 
 //obj1과 obj2의 충돌 여부 충돌하면 1로 반환 아니면 0으로 반환
 int is_collide(RectangleShape obj1, RectangleShape obj2) {
 	return obj1.getGlobalBounds().intersects(obj2.getGlobalBounds());
+}
+
+// 움직이는 함수
+void moving(struct Player player)
+{
+	if (Keyboard::isKeyPressed(Keyboard::Left))
+	{
+		player.sprite.move(-1 * player.speed, 0);//왼쪽 이동
+	}
+	if (Keyboard::isKeyPressed(Keyboard::Up))
+	{
+		player.sprite.move(0, -1 * player.speed);//위쪽 이동
+	}
+	if (Keyboard::isKeyPressed(Keyboard::Down))
+	{
+		player.sprite.move(0, player.speed);//아래쪽 이동
+	}
+	if (Keyboard::isKeyPressed(Keyboard::Right))
+	{
+		player.sprite.move(player.speed, 0);//오른쪽 이동
+	}
 }
 
 // 전역변수 - const로 처리하여 중간에 값을 바꿀 수 없는 것만 전역변수로 세팅
@@ -100,7 +121,8 @@ int main(void) {
 	sb.BGM.loadFromFile("./resources/sound/bgm.ogg");
 	sb.rumble.loadFromFile("./resources/sound/rumble.flac");// 적 죽을 때 효과음
 	sb.item.loadFromFile("./resources/sound/item.flac");// item얻을 때 효과음
-	sb.gameover.loadFromFile("./resources/sound/gameover.flac");
+	// TODO : 게임종료됐을 때 브금 틀기
+	sb.gameover.loadFromFile("./resources/sound/game_over.wav");// 게임이 종료되었을 떄의 효과음
 
 	srand(time(0));//랜덤 함수 사용
 
@@ -138,9 +160,10 @@ int main(void) {
 
 	//gameover
 	struct Gameover gameover;
+	Sound gameover_sound;
 	gameover.sprite.setTexture(t.gameover);
 	gameover.sprite.setPosition(0,0);//game over 그림 가운데 나타내기
-	gameover.sound.setBuffer(sb.gameover);
+	//gameover_sound.setBuffer(sb.gameover);
 
 	// 플레이어
 	struct Player player;
@@ -152,7 +175,7 @@ int main(void) {
 	player.speed = 7;//플레이어 속도
 	player.speed_max = 10;// 이속 최대값
 	player.score = 0;//플레이어 초기 점수
-	player.life = 5;// 플레이어 생명
+	player.life = 1;// 플레이어 생명
 
 	// 총알
 	int bullet_speed = 20;// 총알 속도
@@ -233,28 +256,31 @@ int main(void) {
 		if (player.life <= 0)
 		{
 			is_gameover = 1;// 1 == true
-			BGM_sound.setLoop(0);// 배경음악 종료
-			gameover.sound.play();// gameover 효과음
 		}
 
 		/* player update */
 		//방향키
-		if (Keyboard::isKeyPressed(Keyboard::Left))
+		if (player.life > 0)
 		{
-			player.sprite.move(-1 * player.speed, 0);//왼쪽 이동
+			if (Keyboard::isKeyPressed(Keyboard::Left))
+			{
+				player.sprite.move(-1 * player.speed, 0);//왼쪽 이동
+			}
+			if (Keyboard::isKeyPressed(Keyboard::Up))
+			{
+				player.sprite.move(0, -1 * player.speed);//위쪽 이동
+			}
+			if (Keyboard::isKeyPressed(Keyboard::Down))
+			{
+				player.sprite.move(0, player.speed);//아래쪽 이동
+			}
+			if (Keyboard::isKeyPressed(Keyboard::Right))
+			{
+				player.sprite.move(player.speed, 0);//오른쪽 이동
+			}
 		}
-		if (Keyboard::isKeyPressed(Keyboard::Up))
-		{
-			player.sprite.move(0, -1 * player.speed);//위쪽 이동
-		}
-		if (Keyboard::isKeyPressed(Keyboard::Down))
-		{
-			player.sprite.move(0, player.speed);//아래쪽 이동
-		}
-		if (Keyboard::isKeyPressed(Keyboard::Right))
-		{
-			player.sprite.move(player.speed, 0);//오른쪽 이동
-		}
+
+		//moving(player);
 
 		//player 이동 범위 제한
 		if (player.x < 0)
@@ -282,7 +308,7 @@ int main(void) {
 			if (spent_time - fired_time > bullet_delay)
 			{
 				//총알이 발사 되어있지 않다면 총알 발사
-				if (!bullet[bullet_idx].is_fired)
+				if (!bullet[bullet_idx].is_fired && player.life > 0 )
 				{
 					bullet[bullet_idx].sprite.setPosition(player.x + 110, player.y + 20);// 총알 초기 위치 (임시 테스트)
 					bullet[bullet_idx].is_fired = 1;
@@ -367,7 +393,7 @@ int main(void) {
 		/* item update */
 		for (int i = 0; i < ITEM_NUM; i++)
 		{
-			if (!item[i].is_presented)// 아이템이 나타나지 않았으면
+			if (!item[i].is_presented && player.life > 0 )// 아이템이 나타나지 않았고 플레이어의 체력이 있다면
 			{
 				if (spent_time - item[i].presented_time > item[i].delay)// 각각의 delay초보다 더 많은 시간이 지나면
 				{
@@ -409,15 +435,13 @@ int main(void) {
 		sprintf(info, "life: %d | score: %d | time: %d\n", player.life, player.score, spent_time/1000);
 
 		text.setString(info);
-		//화면이 열려져 있는 동안 계속 그려야 함
-		//draw는 나중에 호출할수록 우선순위가 높아짐
 
 		//window.clear(Color::Black);//플레이어 자체 제거 (배경 지우기)
 		window.draw(bg_sprite);
 
 		for (int i = 0; i < ENEMY_NUM; i++)
 		{
-			if (enemy[i].life > 0)  window.draw(enemy[i].sprite);//적 보여주기
+			if (enemy[i].life > 0 )  window.draw(enemy[i].sprite);//적 보여주기
 		}
 
 		// 아이템 그려주기
@@ -435,14 +459,23 @@ int main(void) {
 			if (bullet[i].is_fired)
 				window.draw(bullet[i].sprite);
 		}
+		int go = 0;// 별 의미 없는 변수. 0이면 실행 0초과이면 실행하지 않음
 		if (is_gameover)
 		{
 			window.draw(gameover.sprite);
 			// TODO : 게임이 멈추는 것을 구현할 것
+			BGM_sound.stop();
+			go++;
+			//gameover_sound.setLoop(1);
+			//if(gameover_sound.getStatus() == sf::SoundSource::Status::Stopped)
+			//if ( go <= 1 )
+				//gameover_sound.play();// gameover 효과음
 		}
 
 		window.display();
 	}
+
+	//gameover_sound.play();// gameover 효과음
 
 	return 0;
 }
