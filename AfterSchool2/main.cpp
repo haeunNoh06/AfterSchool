@@ -24,6 +24,10 @@ struct Textures {
 	Texture gameclear;
 };
 
+struct SBuffer {
+	SoundBuffer flipped_card;// 카드 뒤집는 소리
+};
+
 struct Gameclear {
 	Sprite sprite;
 };
@@ -67,6 +71,13 @@ int main(void) {
 	t.img[7].loadFromFile("./resources/images/ch7.png");
 	t.img[8].loadFromFile("./resources/images/ch8.png");
 	t.gameclear.loadFromFile("./resources/images/gameclear.png");
+
+	struct SBuffer sb;
+	sb.flipped_card.loadFromFile("./resources/sounds/flipped_card.ogg");
+
+	// 카드 뒤집기
+	Sound flip_sound;
+	flip_sound.setBuffer(sb.flipped_card);
 
 	Font font;
 	font.loadFromFile("c:/Windows/Fonts/arial.ttf");
@@ -154,6 +165,7 @@ int main(void) {
 								// 뒤집히지 않은 카드만 뒤집겠다
 								if ( cards[i][j].is_clicked == 0 )
 								{
+									flip_sound.play();// 카드 뒤집으면 효과음
 									cards[i][j].is_clicked = 1;// true
 									flipped_num++;// 뒤집혀진 카드 갯수
 
