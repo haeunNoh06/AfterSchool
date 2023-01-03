@@ -43,15 +43,16 @@ int main(void) {
 	// f : 소수
 	// Vector2i : 정수
 	Vector2i mouse_pos;// 마우스 좌표
-	int flipped_num = 0;// 현재 뒤집혀진 카드의 갯수
-	int cleared_num = 0;// 정답인 카드 갯수
+	int flipped_num;// 현재 뒤집혀진 카드의 갯수
+	int cleared_num;// 정답인 카드 갯수
 
 	long start_time;// 프로그램 시작 시각
 	long spent_time;// 현재 시각
 	long delay_time;// 바로 다시 ? 로 뒤집혀지지 않도록 딜레이를 줌
 
 	struct Gameclear clear;
-	int is_gameover;// 게임 종료 여부
+	int is_clear;// 게임 종료 여부
+	int start = 1;// 게임 다시 시작 여부
 
 	srand(time(0));
 
@@ -80,44 +81,52 @@ int main(void) {
 
 	struct Card compare_card;// 첫 번째로 뒤집힌 카드
 	struct Card cards[row][row];
-	int n = 0;
-	for (int i = 0; i < row; i++)
-	{
-		for (int j = 0; j < row; j++)
-		{
-			cards[i][j].sprite.setSize(Vector2f(CARD_W, CARD_H));
-			cards[i][j].sprite.setPosition(j * CARD_W, i * CARD_H);// j가 커질수록 x값이 100증가, i가 커질수록 y값이 200증가
-			cards[i][j].sprite.setTexture(&t.img[0]);// 뒤집는 그림이 0이기 때문에 1부터
-			cards[i][j].type = 1 + n / 2;
-			// id초기화 없어짐, 섞은 후 id값은 나중에 주기
-			cards[i][j].is_clicked = 0;
-			cards[i][j].is_cleared = 0;// 아직 깨지 않았으므로 0임
-			n++;
-		}
-	}
-
-	// 카드 100번 섞기
-	for (int i = 0; i < 100; i++)
-	{
-		swap_card(&cards[rand() % row][rand() % row], &cards[rand()%row][rand()%row]);
-	}
-
-	// 인덱스에 맞춰id값, 위치 재조정
-	for (int i = 0; i < row; i++)
-	{
-		for (int j = 0; j < row; j++)
-		{
-			cards[i][j].id_i = i;
-			cards[i][j].id_j = j;
-			cards[i][j].sprite.setPosition(j*CARD_W+200, i*CARD_H);
-		}
-	}
-
-	start_time = clock();
-	delay_time = start_time;
+	int n;
 
 	while (window.isOpen())
 	{
+		if (start == 1)
+		{
+			flipped_num = 0;// 현재 뒤집혀진 카드의 갯수
+			cleared_num = 0;// 정답인 카드 갯수
+			n = 0;
+			for (int i = 0; i < row; i++)
+			{
+				for (int j = 0; j < row; j++)
+				{
+					cards[i][j].sprite.setSize(Vector2f(CARD_W, CARD_H));
+					cards[i][j].sprite.setPosition(j * CARD_W, i * CARD_H);// j가 커질수록 x값이 100증가, i가 커질수록 y값이 200증가
+					cards[i][j].sprite.setTexture(&t.img[0]);// 뒤집는 그림이 0이기 때문에 1부터
+					cards[i][j].type = 1 + n / 2;
+					// id초기화 없어짐, 섞은 후 id값은 나중에 주기
+					cards[i][j].is_clicked = 0;
+					cards[i][j].is_cleared = 0;// 아직 깨지 않았으므로 0임
+					n++;
+				}
+			}
+
+			// 카드 100번 섞기
+			for (int i = 0; i < 100; i++)
+			{
+				swap_card(&cards[rand() % row][rand() % row], &cards[rand() % row][rand() % row]);
+			}
+
+			// 인덱스에 맞춰id값, 위치 재조정
+			for (int i = 0; i < row; i++)
+			{
+				for (int j = 0; j < row; j++)
+				{
+					cards[i][j].id_i = i;
+					cards[i][j].id_j = j;
+					cards[i][j].sprite.setPosition(j * CARD_W + 200, i * CARD_H);
+				}
+			}
+
+			start_time = clock();
+			delay_time = start_time;
+		}
+		start = 0;
+
 		mouse_pos = Mouse::getPosition(window);// 마우스 좌표 실시간으로 받기
 		spent_time = clock() - start_time;
 
@@ -200,10 +209,7 @@ int main(void) {
 		if (flipped_num == 2)
 		{
 			// 두 카드가 뒤집힌지 1초 이내가 아니라면
-			if (spent_time - delay_time <= 1000)
-			{
-			}
-			else
+			if (spent_time - delay_time > 1000)
 			{
 				for (int i = 0; i < row; i++)
 					for (int j = 0; j < row; j++)
@@ -213,7 +219,7 @@ int main(void) {
 			}
 		}
 
-		sprintf(info, "time: %d\n", spent_time/1000);
+		sprintf(info, " time: %d\n", spent_time/1000);
 		text.setString(info);
 		
 		window.clear(Color::White);
@@ -225,13 +231,28 @@ int main(void) {
 				window.draw(cards[i][j].sprite);
 			}
 		}
-
+		
 		// 게임 종료
 		if (cleared_num == 16)
 		{
-			is_gameover = 1;
+			is_clear = 1;
 			clear.sprite.setTexture(t.gameclear);
 			window.draw(clear.sprite);
+		}
+
+		// 재시작
+		if (Keyboard::isKeyPressed(Keyboard::Space))
+		{
+			start = 1;
+			window.clear(Color::White);
+			for (int i = 0; i < row; i++)
+			{
+				for (int j = 0; j < row; j++)
+				{
+					window.draw(cards[i][j].sprite);
+				}
+			}
+			cleared_num = 0;
 		}
 
 		window.draw(text);
