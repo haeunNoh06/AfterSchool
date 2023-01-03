@@ -162,8 +162,8 @@ int main(void) {
 							// 마우스 위치가 cards[i][j]의 위치에 해당한다면?
 							if (cards[i][j].sprite.getGlobalBounds().contains(mouse_pos.x, mouse_pos.y))
 							{
-								// 뒤집히지 않은 카드만 뒤집겠다
-								if ( cards[i][j].is_clicked == 0 )
+								// 뒤집히지 않은 카드와 뒤집어진 카드 수가 2개 미만일 때만 뒤집겠다
+								if ( cards[i][j].is_clicked == 0 && flipped_num < 2 )
 								{
 									flip_sound.play();// 카드 뒤집으면 효과음
 									cards[i][j].is_clicked = 1;// true
