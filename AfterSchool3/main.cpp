@@ -7,6 +7,11 @@
 
 using namespace sf;
 
+enum jump_state {
+	RUN,
+	JUMP
+};
+
 struct Player {
 	RectangleShape sprite;
 	int x;
@@ -21,6 +26,7 @@ struct Player {
 
 	int speed;// 속도
 	//점프와 관련된 변수
+	enum jump_state jump_state;
 	int is_jumping;// 점프 상태
 	int jumping_time;// 점프를 시작하는 시각
 	int jump_speed;// 점프 속도
@@ -30,6 +36,7 @@ struct Player {
 struct Obstacle {
 	RectangleShape sprite;
 	int speed;
+	int is_moving;// 움직이고 있는가
 };
 
 struct Textures {
@@ -82,6 +89,7 @@ int main(void)
 
 	// Player
 	struct Player player;
+	player.jump_state = RUN;
 	player.fps = 10;
 	player.sprite.setTexture(&t.run[0]);
 	player.sprite.setSize(Vector2f(90, 120));
@@ -100,6 +108,7 @@ int main(void)
 		ob[i].sprite.setTexture(&t.obstacle);
 		ob[i].sprite.setPosition(W_WIDTH, W_HEIGHT);
 		ob[i].speed = -(rand()%5+1);
+		ob[i].is_moving = 0;
 	}
 
 	//배경
@@ -154,11 +163,20 @@ int main(void)
 			}
 		}
 
+		
+
 		// 시작 시간은 변하지 않음
 		sprintf(info, "time: %d\n",spent_time / 1000);
 
 		text.setString(info);
 
+		
+
+		if (player.is_jumping == 1)
+		{
+			player.idx = 0;
+			player.sprite.move(0, -player.jump_speed);
+		}
 		// 0.1초마다 애니메이션 그림이 바뀜
 		while (spent_time - player.ani_time > 1000 / player.ani_delay)
 		{
@@ -172,10 +190,12 @@ int main(void)
 		if (spent_time - player.jumping_time > 500)
 		{
 			player.is_jumping = 0;
+			player.jump_state = RUN;
 		}
 
 		player.sprite.move(0, GRAVITY*2);// 중력 적용
 
+		/*
 		if (player.is_jumping == 1)
 		{
 			player.idx = 0;
@@ -189,6 +209,7 @@ int main(void)
 			}
 			player.sprite.move(0, -player.jump_speed);
 		}
+		*/
 
 		// 플레이어가 땅바닥에 착지 하면
 		if (player.sprite.getPosition().y + player.sprite.getSize().y > PLATFORM_Y)// 땅 바닥의 y좌표와 플레이어의 y좌표를 빼야 플레이어가 땅에 서있음
@@ -200,6 +221,13 @@ int main(void)
 		window.clear(Color::Blue);
 
 		window.draw(bg_sprite);
+
+		// 장애물이 끝에 닿으면 다시 오른쪽 끝부터 나오기
+		for (int i = 0; i < OBSTACLE_NUM; i++)
+		{
+			if (ob[i].sprite.getPosition().x < 0)
+				ob[i].sprite.setPosition(W_WIDTH,PLATFORM_Y);
+		}
 
 		window.draw(player.sprite);
 
