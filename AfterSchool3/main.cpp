@@ -37,7 +37,7 @@ int main(void)
 	const int PLATFORM_Y = 600;// 땅 바닥의 y좌표
 
 	struct Textures t;
-	t.bg.loadFromFile("./resources/imgs/Run__000.png");
+	t.bg.loadFromFile("./resources/imgs/background.png");
 	t.run[0].loadFromFile("./resources/imgs/Run__000.png");
 	t.run[1].loadFromFile("./resources/imgs/Run__001.png");
 	t.run[2].loadFromFile("./resources/imgs/Run__002.png");
@@ -59,6 +59,11 @@ int main(void)
 	player.ani_delay = 1000 / player.frames / 2;// 0.5초마다 걸음
 	player.speed = 5;
 	player.jump_speed = GRAVITY * 2;// 일정한 속도로 올라가거나 내려감
+
+	//배경
+	Sprite bg_sprite;
+	bg_sprite.setTexture(t.bg);
+	bg_sprite.setPosition(0, 0);
 
 	start_time = clock();
 	player.ani_time = start_time;
@@ -132,7 +137,9 @@ int main(void)
 			player.sprite.setPosition(player.sprite.getPosition().x, PLATFORM_Y - player.sprite.getSize().y);
 		}
 
-		window.clear(Color::Magenta);
+		window.clear(Color::Blue);
+
+		window.draw(bg_sprite);
 
 		window.draw(player.sprite);
 
