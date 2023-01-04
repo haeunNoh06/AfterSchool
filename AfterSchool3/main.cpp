@@ -1,11 +1,17 @@
 #include <stdio.h>
+#include <stdlib.h>
 #include <time.h>
 #include <SFML/Graphics.hpp>
+#include <SFML/Audio.hpp>//SoundBuffer 사용
+//#include <SFML/Audio/SoundSource.hpp>
 
 using namespace sf;
 
 struct Player {
 	RectangleShape sprite;
+	int x;
+	int y;
+
 	// 애니메이션 관련 변수
 	int fps;// 초당 프레임 갯수 (frame per sec)
 	int idx;// 애니메이션 인덱스
@@ -20,24 +26,39 @@ struct Player {
 	int jump_speed;// 점프 속도
 };
 
+// 장애물
+struct Obstacle {
+	RectangleShape sprite;
+	int speed;
+};
+
 struct Textures {
 	Texture run[10];
+	Texture jump[10];
 	Texture bg;
+	Texture obstacle;// 장애물
 };
+
+const int OBSTACLE_NUM = 3;// 장애물 수
+const int GRAVITY = 5;// 중력
+const int PLATFORM_Y = 600;// 땅 바닥의 y좌표
+const int W_WIDTH = 1200, W_HEIGHT = 800;// 창의 크기
+
 
 int main(void)
 {
 	RenderWindow window(VideoMode(1200, 800), "Animation");
 	window.setFramerateLimit(60);
 
+	srand(time(0));
+
 	long start_time;
 	long spent_time;// 게임 진행 시간
 
-	const int GRAVITY = 5;// 중력
-	const int PLATFORM_Y = 600;// 땅 바닥의 y좌표
 
 	struct Textures t;
 	t.bg.loadFromFile("./resources/imgs/background.png");
+	t.obstacle.loadFromFile("./resources/imgs/obstacle.png");
 	t.run[0].loadFromFile("./resources/imgs/Run__000.png");
 	t.run[1].loadFromFile("./resources/imgs/Run__001.png");
 	t.run[2].loadFromFile("./resources/imgs/Run__002.png");
@@ -48,6 +69,16 @@ int main(void)
 	t.run[7].loadFromFile("./resources/imgs/Run__007.png");
 	t.run[8].loadFromFile("./resources/imgs/Run__008.png");
 	t.run[9].loadFromFile("./resources/imgs/Run__009.png");
+	t.jump[0].loadFromFile("./resources/imgs/Jump__000.png");
+	t.jump[1].loadFromFile("./resources/imgs/Jump__001.png");
+	t.jump[2].loadFromFile("./resources/imgs/Jump__002.png");
+	t.jump[3].loadFromFile("./resources/imgs/Jump__003.png");
+	t.jump[4].loadFromFile("./resources/imgs/Jump__004.png");
+	t.jump[5].loadFromFile("./resources/imgs/Jump__005.png");
+	t.jump[6].loadFromFile("./resources/imgs/Jump__006.png");
+	t.jump[7].loadFromFile("./resources/imgs/Jump__007.png");
+	t.jump[8].loadFromFile("./resources/imgs/Jump__008.png");
+	t.jump[9].loadFromFile("./resources/imgs/Jump__009.png");
 
 	// Player
 	struct Player player;
@@ -55,15 +86,38 @@ int main(void)
 	player.sprite.setTexture(&t.run[0]);
 	player.sprite.setSize(Vector2f(90, 120));
 	player.sprite.setPosition(200, 200);
+	player.x = player.sprite.getPosition().x;// 플레이어 x좌표
+	player.y = player.sprite.getPosition().y;// 플레이어 y좌표
 	player.frames = 10;
 	player.ani_delay = 1000 / player.frames / 2;// 0.5초마다 걸음
 	player.speed = 5;
-	player.jump_speed = GRAVITY * 2;// 일정한 속도로 올라가거나 내려감
+	player.jump_speed = GRAVITY * 3;// 일정한 속도로 올라가거나 내려감
+
+	// 장애물
+	struct Obstacle ob[OBSTACLE_NUM];
+	for (int i = 0; i < OBSTACLE_NUM; i++)
+	{
+		ob[i].sprite.setTexture(&t.obstacle);
+		ob[i].sprite.setPosition(W_WIDTH, W_HEIGHT);
+		ob[i].speed = -(rand()%5+1);
+	}
 
 	//배경
 	Sprite bg_sprite;
 	bg_sprite.setTexture(t.bg);
 	bg_sprite.setPosition(0, 0);
+
+	// text 폰트
+	Font font;
+	font.loadFromFile("C:\\Windows\\Fonts\\Candara.ttf");//C드라이브에 있는 폰트 가져오기
+
+	// 텍스트
+	Text text;
+	char info[40];
+	text.setFont(font);//폰트 세팅
+	text.setCharacterSize(24);//폰트 크기
+	text.setFillColor(Color(0, 0, 0));//RGB로 흰색 표현
+	text.setPosition(10, 10);//텍스트 위치 0,0
 
 	start_time = clock();
 	player.ani_time = start_time;
@@ -73,6 +127,10 @@ int main(void)
 	while (window.isOpen())
 	{
 		spent_time = clock() - start_time;
+
+		player.x = player.sprite.getPosition().x;// 플레이어 x좌표
+		player.y = player.sprite.getPosition().y;// 플레이어 y좌표
+
 		Event event;
 		while (window.pollEvent(event))
 		{
@@ -96,17 +154,10 @@ int main(void)
 			}
 		}
 
-		if (Keyboard::isKeyPressed(Keyboard::Right))
-		{
-			player.sprite.setScale(1, 1);
-			player.sprite.move(player.speed, 0);
+		// 시작 시간은 변하지 않음
+		sprintf(info, "time: %d\n",spent_time / 1000);
 
-		}
-		else if (Keyboard::isKeyPressed(Keyboard::Left))
-		{
-			player.sprite.setScale(-1, 1);
-			player.sprite.move(-player.speed, 0);
-		}
+		text.setString(info);
 
 		// 0.1초마다 애니메이션 그림이 바뀜
 		while (spent_time - player.ani_time > 1000 / player.ani_delay)
@@ -118,15 +169,24 @@ int main(void)
 		}
 
 		//필요하다면 1000을 나중에 변수 처리할것
-		if (spent_time - player.jumping_time > 1000)
+		if (spent_time - player.jumping_time > 500)
 		{
 			player.is_jumping = 0;
 		}
 
-		player.sprite.move(0, GRAVITY);// 중력 적용
+		player.sprite.move(0, GRAVITY*2);// 중력 적용
 
 		if (player.is_jumping == 1)
 		{
+			player.idx = 0;
+			// 0.1초마다 애니메이션 그림이 바뀜
+			while (spent_time - player.ani_time > 1000 / player.ani_delay)
+			{
+				// 반복하려고
+				player.ani_time = spent_time;
+				player.sprite.setTexture(&t.jump[player.idx % player.frames]);
+				player.idx++;
+			}
 			player.sprite.move(0, -player.jump_speed);
 		}
 
@@ -142,6 +202,8 @@ int main(void)
 		window.draw(bg_sprite);
 
 		window.draw(player.sprite);
+
+		window.draw(text);
 
 		window.display();
 	}
