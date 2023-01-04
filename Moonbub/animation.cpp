@@ -24,16 +24,16 @@ int main(void)
 	long spent_time;
 
 	Texture run[10];
-	run[0].loadFromFile("./resources/images/Run__000.png");
-	run[1].loadFromFile("./resources/images/Run__001.png");
-	run[2].loadFromFile("./resources/images/Run__002.png");
-	run[3].loadFromFile("./resources/images/Run__003.png");
-	run[4].loadFromFile("./resources/images/Run__004.png");
-	run[5].loadFromFile("./resources/images/Run__005.png");
-	run[6].loadFromFile("./resources/images/Run__006.png");
-	run[7].loadFromFile("./resources/images/Run__007.png");
-	run[8].loadFromFile("./resources/images/Run__008.png");
-	run[9].loadFromFile("./resources/images/Run__009.png");
+	run[0].loadFromFile("./resources/imgs/Run__000.png");
+	run[1].loadFromFile("./resources/imgs/Run__001.png");
+	run[2].loadFromFile("./resources/imgs/Run__002.png");
+	run[3].loadFromFile("./resources/imgs/Run__003.png");
+	run[4].loadFromFile("./resources/imgs/Run__004.png");
+	run[5].loadFromFile("./resources/imgs/Run__005.png");
+	run[6].loadFromFile("./resources/imgs/Run__006.png");
+	run[7].loadFromFile("./resources/imgs/Run__007.png");
+	run[8].loadFromFile("./resources/imgs/Run__008.png");
+	run[9].loadFromFile("./resources/imgs/Run__009.png");
 
 	// Player
 	struct Player player;
@@ -59,6 +59,12 @@ int main(void)
 			case Event::Closed:
 				window.close();
 				break;
+			case Event::KeyPressed:
+				if (event.key.code == Keyboard::Space)
+				{
+					// 점프 기능
+					player.sprite.move(0, -3);
+				}
 			default:
 				break;
 			}
