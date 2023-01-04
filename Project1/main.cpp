@@ -108,7 +108,6 @@ const int GO_WIDTH = 880, GO_HEIGHT = 468;// 게임오버 그림의 크기
 
 int main(void) {
 
-
 	// console 제거
 	#ifdef WIN32
 		HWND hwnd = GetConsoleWindow();
@@ -289,24 +288,22 @@ int main(void) {
 			}
 		}
 
-		//moving(player);
-
 		//player 이동 범위 제한
-		if (player.x < 0)
+		if( player.sprite.getPosition().x < 0)
 		{
-			player.sprite.setPosition(0, player.y);
+			player.sprite.setPosition(0, player.sprite.getPosition().y);
 		}
-		else if (player.x > W_WIDTH - 150)
+		else if (player.sprite.getPosition().x > W_WIDTH - 150)
 		{
-			player.sprite.setPosition(W_WIDTH - 150, player.y);
+			player.sprite.setPosition(W_WIDTH - 150, player.sprite.getPosition().y);
 		}
-		if (player.y < 0)
+		if (player.sprite.getPosition().y < 0)
 		{
-			player.sprite.setPosition(player.x, 0);
+			player.sprite.setPosition(player.sprite.getPosition().x, 0);
 		}
-		else if (player.y > W_HEIGHT - 150)
+		else if (player.sprite.getPosition().y > W_HEIGHT - 150)
 		{
-			player.sprite.setPosition(player.x, W_HEIGHT - 150);
+			player.sprite.setPosition(player.sprite.getPosition().x, W_HEIGHT - 150);
 		}
 
 		/* bullet update */
