@@ -61,15 +61,15 @@ int main(void) {
 	srand(time(0));
 
 	struct Textures t;
-	t.img[0].loadFromFile("./resources/images/ch0.png");
-	t.img[1].loadFromFile("./resources/images/ch1.png");
-	t.img[2].loadFromFile("./resources/images/ch2.png");
-	t.img[3].loadFromFile("./resources/images/ch3.png");
-	t.img[4].loadFromFile("./resources/images/ch4.png");
-	t.img[5].loadFromFile("./resources/images/ch5.png");
-	t.img[6].loadFromFile("./resources/images/ch6.png");
-	t.img[7].loadFromFile("./resources/images/ch7.png");
-	t.img[8].loadFromFile("./resources/images/ch8.png");
+	t.img[0].loadFromFile("./resources/images/000.png");
+	t.img[1].loadFromFile("./resources/images/001.png");
+	t.img[2].loadFromFile("./resources/images/002.png");
+	t.img[3].loadFromFile("./resources/images/003.png");
+	t.img[4].loadFromFile("./resources/images/004.png");
+	t.img[5].loadFromFile("./resources/images/005.png");
+	t.img[6].loadFromFile("./resources/images/006.png");
+	t.img[7].loadFromFile("./resources/images/007.png");
+	t.img[8].loadFromFile("./resources/images/008.png");
 	t.gameclear.loadFromFile("./resources/images/gameclear.png");
 
 	struct SBuffer sb;
@@ -188,7 +188,7 @@ int main(void) {
 										// 두 카드가 다른 종류이면
 										else
 										{
-											cards[i][j].is_clicked = 0;
+											cards[i][j].is_clicked = 1;
 											delay_time = spent_time;
 										}
 
