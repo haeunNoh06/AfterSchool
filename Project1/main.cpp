@@ -11,7 +11,9 @@
 #include <SFML/Graphics.hpp>
 #include <SFML/Audio.hpp>//SoundBuffer 사용
 #include <SFML/Audio/SoundSource.hpp>
+#include <Windows.h>
 //#include <Windows.h>// sleep() 사용
+
 
 using namespace sf;
 
@@ -105,6 +107,13 @@ const int W_WIDTH = 1280, W_HEIGHT = 575;// 창의 크기
 const int GO_WIDTH = 880, GO_HEIGHT = 468;// 게임오버 그림의 크기
 
 int main(void) {
+
+
+	// console 제거
+	#ifdef WIN32
+		HWND hwnd = GetConsoleWindow();
+		ShowWindow(hwnd, SW_HIDE);
+	#endif
 
 	//이미지
 	struct Textures t;
