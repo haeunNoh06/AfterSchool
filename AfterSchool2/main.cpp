@@ -188,6 +188,7 @@ int main(void) {
 										// 두 카드가 다른 종류이면
 										else
 										{
+											cards[i][j].is_clicked = 0;
 											delay_time = spent_time;
 										}
 
@@ -205,7 +206,7 @@ int main(void) {
 			for (int j = 0; j < row; j++)
 			{
 				// 클릭이 된 상태이거나 정답을 맞춘 카드이면
-				if (cards[i][j].is_clicked == 1 || cards[i][j].is_cleared == 1 )
+				if ( cards[i][j].is_clicked == 1 || cards[i][j].is_cleared == 1 )
 				{
 					// 그림이 있는 스프라이트로 변경 (카드를 뒤집겠다는 의미)
 					cards[i][j].sprite.setTexture(&t.img[cards[i][j].type]);
@@ -218,8 +219,7 @@ int main(void) {
 			}
 		}
 
-		// 나중에 지울거임
-		// 뒤집힌 카드가 2개라면 TODO : 두 번째 카드는 바로 다시 뒤집혀지지 않게 하기
+		// 뒤집힌 카드가 2개라면
 		if (flipped_num == 2)
 		{
 			// 두 카드가 뒤집힌지 1초 이내가 아니라면
