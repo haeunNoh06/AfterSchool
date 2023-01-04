@@ -6,13 +6,18 @@ using namespace sf;
 
 struct Player {
 	RectangleShape sprite;
+	// 애니메이션 관련 변수
 	int fps;// 초당 프레임 갯수 (frame per sec)
 	int idx;// 애니메이션 인덱스
 	int frames;// 애니메이션 frame 수
 	long ani_time;// 애니메이션이 바뀔 때의 시각
 	long ani_delay;// 화면 전환의 텀
-	int speed;// 속도
 
+	int speed;// 속도
+	//점프와 관련된 변수
+	int is_jumping;// 점프 상태
+	int jumping_time;// 점프를 시작하는 시각
+	int jump_speed;// 점프 속도
 };
 
 int main(void)
@@ -21,7 +26,7 @@ int main(void)
 	window.setFramerateLimit(60);
 
 	long start_time;
-	long spent_time;
+	long spent_time;// 게임 진행 시간
 
 	const int GRAVITY = 10;// 중력
 	const int PLATFORM_Y = 600;// 땅 바닥의 y좌표
@@ -47,9 +52,12 @@ int main(void)
 	player.frames = 10;
 	player.ani_delay = 1000 / player.frames / 2;// 0.5초마다 걸음
 	player.speed = 5;
+	player.jump_speed = GRAVITY + 3;
 
 	start_time = clock();
 	player.ani_time = start_time;
+	player.jumping_time = start_time;
+	player.is_jumping = 0;
 
 	while (window.isOpen())
 	{
@@ -66,7 +74,7 @@ int main(void)
 				if (event.key.code == Keyboard::Space)
 				{
 					// 점프 기능
-					player.sprite.move(0, -3);
+					player.is_jumping = 1;// true
 				}
 			default:
 				break;
@@ -96,6 +104,11 @@ int main(void)
 
 		player.sprite.move(0, GRAVITY);// 중력 적용
 		
+		if (player.is_jumping == 1)
+		{
+			player.sprite.move(0, -player.jump_speed);
+		}
+
 		// 플레이어가 땅바닥에 착지 하면
 		if (player.sprite.getPosition().y + player.sprite.getSize().y > PLATFORM_Y)// 땅 바닥의 y좌표와 플레이어의 y좌표를 빼야 플레이어가 땅에 서있음
 		{
