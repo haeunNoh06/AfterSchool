@@ -475,7 +475,5 @@ int main(void) {
 		window.display();
 	}
 
-	//gameover_sound.play();// gameover È¿°úÀ½
-
 	return 0;
 }
