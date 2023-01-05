@@ -36,7 +36,7 @@ struct Player {
 struct Obstacle {
 	RectangleShape sprite;
 	int speed;
-	int is_moving;// 움직이고 있는가
+	int is_appeared;// 나타났는가
 };
 
 struct Textures {
@@ -61,7 +61,6 @@ int main(void)
 
 	long start_time;
 	long spent_time;// 게임 진행 시간
-
 
 	struct Textures t;
 	t.bg.loadFromFile("./resources/imgs/background.png");
@@ -112,7 +111,7 @@ int main(void)
 		ob[i].sprite.setTexture(&t.obstacle);
 		ob[i].sprite.setPosition(W_WIDTH-70,PLATFORM_Y-96);
 		ob[i].speed = -(rand()%5+1);
-		ob[i].is_moving = 0;
+		ob[i].is_appeared = 0;
 	}
 
 	//배경
@@ -172,23 +171,37 @@ int main(void)
 		
 
 		// 시작 시간은 변하지 않음
-		sprintf(info, "time: %d, cho: %d %d\n",spent_time / 1000, (spent_time)/1000, (clock() - ob_appeared_time )/1000-clock());
+		sprintf(info, "time: %d, cho: %d\n",spent_time / 1000, (clock() - ob_appeared_time )/1000);
 
 		text.setString(info);
 
 		// 1.5초 마다 장애물 나오기
 		if (spent_time - ob_appeared_time > ob_delay)
 		{
-			if (ob[ob_idx].is_moving == 0)
+			if ( ob[ob_idx].is_appeared == 0)
 			{
-				ob[ob_idx].sprite.move(ob[ob_idx].speed, 0);
 				ob_appeared_time = spent_time;
-				ob[ob_idx].is_moving = 1;
-				ob_idx++;
+				ob[ob_idx].is_appeared = 1;
 				ob_idx = ob_idx % OBSTACLE_NUM;// 3 대신 0으로 바뀜
+				ob[ob_idx].sprite.setPosition(W_WIDTH - 70, PLATFORM_Y - 96);
+				ob_idx++;// 후에 증가
 			}
+
 		}
 
+		for (int i = 0; i < OBSTACLE_NUM; i++)
+		{
+			if (ob[i].is_appeared == 1)
+			{	  
+				ob[i].sprite.move(ob[ob_idx].speed, 0);
+			}	  
+				   
+			// 장애물애닿으면
+			if (ob[i].sprite.getPosition().x < 0)
+			{	   
+				ob[i].is_appeared = 0;
+			}
+		}
 		if (player.is_jumping == 1)
 		{
 			player.idx = 0;
@@ -212,22 +225,6 @@ int main(void)
 
 		player.sprite.move(0, GRAVITY*2);// 중력 적용
 
-		/*
-		if (player.is_jumping == 1)
-		{
-			player.idx = 0;
-			// 0.1초마다 애니메이션 그림이 바뀜
-			while (spent_time - player.ani_time > 1000 / player.ani_delay)
-			{
-				// 반복하려고
-				player.ani_time = spent_time;
-				player.sprite.setTexture(&t.jump[player.idx % player.frames]);
-				player.idx++;
-			}
-			player.sprite.move(0, -player.jump_speed);
-		}
-		*/
-
 		// 플레이어가 땅바닥에 착지 하면
 		if (player.sprite.getPosition().y + player.sprite.getSize().y > PLATFORM_Y)// 땅 바닥의 y좌표와 플레이어의 y좌표를 빼야 플레이어가 땅에 서있음
 		{
@@ -241,7 +238,10 @@ int main(void)
 
 		for (int i = 0; i < OBSTACLE_NUM; i++)
 		{
-			window.draw(ob[i].sprite);
+			if (ob[i].is_appeared == 1)
+			{
+				window.draw(ob[i].sprite);
+			}
 		}
 
 		window.draw(player.sprite);
