@@ -103,10 +103,14 @@ int main(void)
 
 	// 장애물
 	struct Obstacle ob[OBSTACLE_NUM];
+	int ob_idx = 0;// 장애물이 나올 때마다 증가시킬 것
+	int ob_delay = 1500;
+	int ob_appeared_time;// 장애물이 나타난 시각
 	for (int i = 0; i < OBSTACLE_NUM; i++)
 	{
+		ob[i].sprite.setSize(Vector2f(70, 96));
 		ob[i].sprite.setTexture(&t.obstacle);
-		ob[i].sprite.setPosition(W_WIDTH, W_HEIGHT);
+		ob[i].sprite.setPosition(W_WIDTH-70,PLATFORM_Y-96);
 		ob[i].speed = -(rand()%5+1);
 		ob[i].is_moving = 0;
 	}
@@ -132,6 +136,8 @@ int main(void)
 	player.ani_time = start_time;
 	player.jumping_time = start_time;
 	player.is_jumping = 0;
+
+	ob_appeared_time = start_time;// 시작 시간
 
 	while (window.isOpen())
 	{
@@ -166,11 +172,22 @@ int main(void)
 		
 
 		// 시작 시간은 변하지 않음
-		sprintf(info, "time: %d\n",spent_time / 1000);
+		sprintf(info, "time: %d, cho: %d %d\n",spent_time / 1000, (spent_time)/1000, (clock() - ob_appeared_time )/1000-clock());
 
 		text.setString(info);
 
-		
+		// 1.5초 마다 장애물 나오기
+		if (spent_time - ob_appeared_time > ob_delay)
+		{
+			if (ob[ob_idx].is_moving == 0)
+			{
+				ob[ob_idx].sprite.move(ob[ob_idx].speed, 0);
+				ob_appeared_time = spent_time;
+				ob[ob_idx].is_moving = 1;
+				ob_idx++;
+				ob_idx = ob_idx % OBSTACLE_NUM;// 3 대신 0으로 바뀜
+			}
+		}
 
 		if (player.is_jumping == 1)
 		{
@@ -222,11 +239,9 @@ int main(void)
 
 		window.draw(bg_sprite);
 
-		// 장애물이 끝에 닿으면 다시 오른쪽 끝부터 나오기
 		for (int i = 0; i < OBSTACLE_NUM; i++)
 		{
-			if (ob[i].sprite.getPosition().x < 0)
-				ob[i].sprite.setPosition(W_WIDTH,PLATFORM_Y);
+			window.draw(ob[i].sprite);
 		}
 
 		window.draw(player.sprite);
