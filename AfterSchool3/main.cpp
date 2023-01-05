@@ -46,11 +46,15 @@ struct Textures {
 	Texture obstacle;// 장애물
 };
 
+//obj1과 obj2의 충돌 여부 충돌하면 1로 반환 아니면 0으로 반환
+int is_collide(RectangleShape obj1, RectangleShape obj2) {
+	return obj1.getGlobalBounds().intersects(obj2.getGlobalBounds());
+}
+
 const int OBSTACLE_NUM = 3;// 장애물 수
 const int GRAVITY = 5;// 중력
 const int PLATFORM_Y = 600;// 땅 바닥의 y좌표
 const int W_WIDTH = 1200, W_HEIGHT = 800;// 창의 크기
-
 
 int main(void)
 {
@@ -182,9 +186,9 @@ int main(void)
 			{
 				ob_appeared_time = spent_time;
 				ob[ob_idx].is_appeared = 1;
-				ob_idx = ob_idx % OBSTACLE_NUM;// 3 대신 0으로 바뀜
 				ob[ob_idx].sprite.setPosition(W_WIDTH - 70, PLATFORM_Y - 96);
 				ob_idx++;// 후에 증가
+				ob_idx = ob_idx % OBSTACLE_NUM;// 3 대신 0으로 바뀜
 			}
 
 		}
