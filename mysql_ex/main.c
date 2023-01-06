@@ -16,12 +16,22 @@ int main(void)
     MYSQL* connection = mysql_real_connect(&mysql, DB_HOST, DB_USER, DB_PASS, DB_NAME, 3306, NULL, 0);
     
     if (connection == NULL)
-        printf("DB 연결 실패");
+        printf("DB 연결 실패\n");
     else
-        printf("DB 연결 성공");
+        printf("DB 연결 성공\n");
 
-
+    int query_result;
+    char insert_q[50] = "INSERT INTO korea VALUES('TOKO', 10000)";
     
+    // Query 실행
+    query_result = mysql_query(connection, insert_q);
+   
+    // 성공하면 0, 실패하면 다른 값을 반환 (ex 100)
+    if (query_result == 0)
+        printf("%s 성공\n", insert_q);
+    else
+        printf("%s 실패\n", insert_q);
+
     
     mysql_close(&mysql);
 }
