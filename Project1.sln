@@ -18,6 +18,8 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "AfterSchool3", "AfterSchool
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "mp3", "mp3\mp3.vcxproj", "{DFA0AFB9-0591-4189-A40B-7257549AB374}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "mysql_ex", "mysql_ex\mysql_ex.vcxproj", "{61165A5A-9954-4B90-BE9A-5CB9F89772DA}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|x64 = Debug|x64
@@ -66,6 +68,14 @@ Global
 		{DFA0AFB9-0591-4189-A40B-7257549AB374}.Release|x64.Build.0 = Release|x64
 		{DFA0AFB9-0591-4189-A40B-7257549AB374}.Release|x86.ActiveCfg = Release|Win32
 		{DFA0AFB9-0591-4189-A40B-7257549AB374}.Release|x86.Build.0 = Release|Win32
+		{61165A5A-9954-4B90-BE9A-5CB9F89772DA}.Debug|x64.ActiveCfg = Debug|x64
+		{61165A5A-9954-4B90-BE9A-5CB9F89772DA}.Debug|x64.Build.0 = Debug|x64
+		{61165A5A-9954-4B90-BE9A-5CB9F89772DA}.Debug|x86.ActiveCfg = Debug|Win32
+		{61165A5A-9954-4B90-BE9A-5CB9F89772DA}.Debug|x86.Build.0 = Debug|Win32
+		{61165A5A-9954-4B90-BE9A-5CB9F89772DA}.Release|x64.ActiveCfg = Release|x64
+		{61165A5A-9954-4B90-BE9A-5CB9F89772DA}.Release|x64.Build.0 = Release|x64
+		{61165A5A-9954-4B90-BE9A-5CB9F89772DA}.Release|x86.ActiveCfg = Release|Win32
+		{61165A5A-9954-4B90-BE9A-5CB9F89772DA}.Release|x86.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
