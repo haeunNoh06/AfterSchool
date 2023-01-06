@@ -16,6 +16,8 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "AfterSchool2", "AfterSchool
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "AfterSchool3", "AfterSchool3\AfterSchool3.vcxproj", "{C150531F-B5E1-4518-B855-A670B2258719}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "mp3", "mp3\mp3.vcxproj", "{DFA0AFB9-0591-4189-A40B-7257549AB374}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|x64 = Debug|x64
@@ -56,6 +58,14 @@ Global
 		{C150531F-B5E1-4518-B855-A670B2258719}.Release|x64.Build.0 = Release|x64
 		{C150531F-B5E1-4518-B855-A670B2258719}.Release|x86.ActiveCfg = Release|Win32
 		{C150531F-B5E1-4518-B855-A670B2258719}.Release|x86.Build.0 = Release|Win32
+		{DFA0AFB9-0591-4189-A40B-7257549AB374}.Debug|x64.ActiveCfg = Debug|x64
+		{DFA0AFB9-0591-4189-A40B-7257549AB374}.Debug|x64.Build.0 = Debug|x64
+		{DFA0AFB9-0591-4189-A40B-7257549AB374}.Debug|x86.ActiveCfg = Debug|Win32
+		{DFA0AFB9-0591-4189-A40B-7257549AB374}.Debug|x86.Build.0 = Debug|Win32
+		{DFA0AFB9-0591-4189-A40B-7257549AB374}.Release|x64.ActiveCfg = Release|x64
+		{DFA0AFB9-0591-4189-A40B-7257549AB374}.Release|x64.Build.0 = Release|x64
+		{DFA0AFB9-0591-4189-A40B-7257549AB374}.Release|x86.ActiveCfg = Release|Win32
+		{DFA0AFB9-0591-4189-A40B-7257549AB374}.Release|x86.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

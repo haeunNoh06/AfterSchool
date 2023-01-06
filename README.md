@@ -2,6 +2,16 @@
 방과후 수업
 <br>
 
+AfterSchool : 슈팅 게임
+
+AfterSchool2 : 그림 맞추기
+
+AfterSchool3 : 장애물 점프 게임
+
+mp3(출처) : https://github.com/SFML/SFML/wiki/Source%3A-MP3-Player
+
+<br>
+
 리소스 출처
 <br>
 

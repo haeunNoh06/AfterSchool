@@ -266,6 +266,7 @@ int main(void)
 
 		for (int i = 0; i < OBSTACLE_NUM; i++)
 		{
+			// 장애물이 나타났다면
 			if (ob[i].is_appeared == 1)
 			{
 				window.draw(ob[i].sprite);
