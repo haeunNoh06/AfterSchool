@@ -26,6 +26,7 @@ struct Player {
 	float x, y;// player ÁÂÇ¥
 };
 
+
 //ÃÑ¾Ë
 struct Bullet {
 	RectangleShape sprite;
